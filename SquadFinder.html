@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GreenSquad</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060c08;--cd:#0f1a13;--ln:#1e3526;--g:#19e68c;--lm:#d4ff3a;--mt:#86a08f;--tx:#fff}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at 50% -10%,#0d2a1b,var(--bg) 55%);color:var(--tx);font:14px 'JetBrains Mono',monospace;min-height:100vh}
+#app{max-width:480px;margin:auto;padding:16px 16px 100px}
+h1,h2,.lg,.nm b,button.big{font-family:Unbounded,sans-serif;text-transform:uppercase}
+h1{font-size:26px;line-height:1.15;margin:8px 0}h2{font-size:22px;margin:6px 0}
+.mt{color:var(--mt);font-size:13px;margin:6px 0 14px}
+.box{background:var(--cd);border:1px solid var(--ln);border-radius:18px;padding:14px;margin-bottom:12px}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.pill{background:#14251b;border:1px solid var(--ln);border-radius:999px;padding:5px 11px;font-size:11px;font-weight:600;text-transform:uppercase}
+.pill.hl{border-color:var(--g);color:var(--g);background:#0b2a1b}.pill.lm{background:var(--lm);color:#0a1400;border:0}
+.bar{height:5px;background:#16281d;border-radius:9px;margin:4px 0 22px}.bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--g),var(--lm))}
+.st{color:var(--g);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{background:var(--cd);border:1px solid var(--ln);border-radius:16px;padding:16px 8px;text-align:center;font-weight:600;cursor:pointer;color:var(--tx);font:inherit;font-weight:600}
+.opt.on{border-color:var(--g);background:#0c2a1b;box-shadow:0 0 18px #19e68c33}.opt small{display:block;color:var(--mt);font-weight:400;margin-top:4px;font-size:11px}
+input,textarea{width:100%;background:var(--cd);border:1px solid var(--ln);border-radius:14px;padding:14px;color:var(--tx);font:inherit;outline:0}
+input:focus,textarea:focus{border-color:var(--g)}input[type=range]{padding:0;accent-color:var(--g)}
+label.l{display:block;color:var(--mt);font-size:11px;text-transform:uppercase;margin:16px 0 8px}
+button.big{width:100%;border:0;border-radius:16px;padding:16px;font-size:15px;font-weight:800;color:#03140b;background:linear-gradient(135deg,var(--g),#0fb86c);box-shadow:0 8px 28px #19e68c44;cursor:pointer}
+button.big:disabled{background:#1b2a21;color:#6f8578;box-shadow:none}
+button.ghost{background:transparent;border:1px solid var(--ln);color:var(--tx);border-radius:14px;padding:14px;font:inherit;cursor:pointer;width:100%;margin-top:10px}
+button.ghost.g{border-color:#19e68c55;color:var(--g)}
+.nav2{display:flex;gap:10px;margin-top:22px}.nav2 .ghost{width:auto;margin:0;padding:14px 18px}
+.lg{display:flex;align-items:center;gap:8px;font-size:22px;font-weight:800}
+.lg i{width:22px;height:22px;background:var(--g);clip-path:polygon(0 0,100% 0,100% 100%)}
+.card{background:var(--cd);border:1px solid var(--ln);border-radius:24px;padding:12px;touch-action:pan-y;transition:transform .2s}
+.ph{height:340px;border-radius:18px;margin:10px 0;background:#0a1510 center/cover;display:flex;align-items:center;justify-content:center}
+.ph i{font:800 90px Unbounded;color:var(--g);font-style:normal;text-shadow:0 0 40px #19e68c}
+.nm{display:flex;align-items:center;gap:8px;margin:4px 0 8px}.nm b{font-size:22px}.sx{color:var(--g);font-size:20px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.acts{display:flex;justify-content:center;gap:22px;margin-top:18px}
+.acts button{width:64px;height:64px;border-radius:50%;border:1px solid var(--ln);background:var(--cd);color:var(--tx);font-size:26px;cursor:pointer}
+.acts .y{width:84px;height:84px;background:var(--g);color:#03140b;box-shadow:0 0 34px #19e68c77;border:0}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;display:flex;gap:6px;background:#0c1a12ee;border:1px solid var(--ln);border-radius:26px;padding:8px;backdrop-filter:blur(12px);z-index:9}
+.tabs button{background:none;border:0;color:var(--mt);font:600 10px 'JetBrains Mono';text-transform:uppercase;padding:8px 18px;border-radius:20px;cursor:pointer}
+.tabs button.on{color:var(--g);background:#0c2a1b;border:1px solid var(--g)}.tabs b{display:block;font-size:20px}
+.ava{width:120px;height:120px;border-radius:50%;margin:10px auto;border:3px solid var(--g);box-shadow:0 0 30px #19e68c55;background:#0a1510 center/cover;display:flex;align-items:center;justify-content:center;font:800 44px Unbounded;color:var(--g)}
+.stats{display:flex;text-align:center}.stats div{flex:1;border-right:1px solid var(--ln)}.stats div:last-child{border:0}.stats b{font:800 22px Unbounded;display:block;color:var(--lm)}
+.pg{height:6px;background:#16281d;border-radius:9px;flex:1}.pg i{display:block;height:100%;background:var(--g);border-radius:9px}
+.rk{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.rk .opt{padding:12px 6px;font-size:12px}
+#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--lm);color:#0a1400;padding:12px 18px;border-radius:14px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:20}
+#toast.on{opacity:1}
+</style></head><body><div id="app"></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),tgw=window.Telegram&&Telegram.WebApp;tgw&&(tgw.ready(),tgw.expand());
+const API=''; // URL бэкенда (https://...). Пусто = демо-режим без сервера
+let S;try{S=JSON.parse(localStorage.gs)}catch(e){}
+S=S||{lang:'ru',view:'welcome',step:1,swipes:0,matches:0,p:{nick:'',age:18,gender:'m',games:[],skill:{},goal:'fun',about:'',photo:''}};
+const save=()=>{try{localStorage.gs=JSON.stringify(S)}catch(e){}};
+const t=(r,e)=>S.lang=='ru'?r:e,esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast=m=>{const e=$('#toast');e.textContent=m;e.className='on';setTimeout(()=>e.className='',2200)};
+const api=(p,b)=>API?fetch(API+p,{method:'POST',headers:{'Content-Type':'application/json','X-Init':(tgw&&tgw.initData)||''},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>null):Promise.resolve(null);
+
+/* игры: r — список званий, n — числовой рейтинг (k — название, div — «потолок» для нормализации) */
+const G={
+'CS2':{r:['Silver','Gold Nova','Master Guardian','Legendary Eagle','Supreme','Global Elite'],k:'Faceit ELO',div:3500},
+'Dota 2':{k:'MMR',div:9000},
+'Valorant':{r:['Iron','Bronze','Silver','Gold','Platinum','Diamond','Ascendant','Immortal','Radiant']},
+'Fortnite':{r:['Bronze','Silver','Gold','Platinum','Diamond','Elite','Champion','Unreal']},
+'Deadlock':{r:['Initiate','Seeker','Alchemist','Arcanist','Ritualist','Emissary','Archon','Oracle','Phantom','Ascendant','Eternus']}};
+const score=(g,s)=>s.t=='r'?s.v/(G[g].r.length-1)*100:Math.min(s.v/G[g].div,1)*100;
+const lvl=(g,s)=>s.t=='r'?G[g].r[s.v]:s.v+' '+G[g].k;
+const GOALS=[['fun','😊','Fun & Chill','Fun & Chill'],['ranked','🎯','Ранкед-стак','Ranked stack'],['tour','🏆','Турниры','Tournaments'],['team','👥','Полноценная команда','Full team']];
+
+const MOCK=[
+{n:'Zaryad',a:19,g:'m',goal:'ranked',about:['Ищу катки по вечерам','Evening games'],sk:{'CS2':{t:'n',v:1650},'Valorant':{t:'r',v:3}}},
+{n:'Mira',a:20,g:'f',goal:'fun',about:['Играю для души, без токсиков','Chill games, no toxicity'],sk:{'Valorant':{t:'r',v:2},'Fortnite':{t:'r',v:3}}},
+{n:'Nord',a:22,g:'m',goal:'tour',about:['Нужна команда на турниры','Need a team for tournaments'],sk:{'Dota 2':{t:'n',v:5200}}},
+{n:'Kiro',a:17,g:'m',goal:'fun',about:['Дота и расслабон','Dota and relax'],sk:{'Dota 2':{t:'n',v:2100},'Deadlock':{t:'r',v:2}}},
+{n:'Vexa',a:21,g:'f',goal:'team',about:['IGL, собираю состав','IGL building a roster'],sk:{'CS2':{t:'r',v:4},'Valorant':{t:'r',v:5}}},
+{n:'Bolt',a:18,g:'m',goal:'ranked',about:['Деадлок, вечером онлайн','Deadlock, online evenings'],sk:{'Deadlock':{t:'r',v:6}}},
+{n:'Sky',a:24,g:'m',goal:'fun',about:['Фортнайт с друзьями','Fortnite with friends'],sk:{'Fortnite':{t:'r',v:5},'CS2':{t:'r',v:1}}},
+{n:'Raze',a:23,g:'f',goal:'ranked',about:['Радиант-стремящаяся','Aiming for Radiant'],sk:{'Valorant':{t:'r',v:7}}}];
+
+let Q=[],qi=0;
+const localQ=()=>{const me=S.p;let c=MOCK.filter(m=>Object.keys(m.sk).some(g=>me.games.includes(g)));
+ const d=m=>Math.min(...Object.keys(m.sk).filter(g=>me.games.includes(g)).map(g=>Math.abs(score(g,m.sk[g])-score(g,me.skill[g]))));
+ if(me.goal=='fun')c.sort(()=>Math.random()-.5);else c.sort((a,b)=>d(a)-d(b)); // фан — без сортировки по скиллу; иначе ближе по уровню
+ return c};
+async function loadQ(){const r=await api('/api/feed',{goal:S.p.goal,skill:S.p.skill,games:S.p.games});Q=(r&&r.items)||localQ();qi=0}
+
+function go(v){S.view=v;save();if(v=='feed')loadQ().then(R);else R()}
+const setL=l=>{S.lang=l;save();R()};
+const langBtn=()=>`<div class="row" style="justify-content:flex-end;margin-bottom:6px"><span class="pill ${S.lang=='ru'?'hl':''}" onclick="setL('ru')">RU</span><span class="pill ${S.lang=='en'?'hl':''}" onclick="setL('en')">EN</span></div>`;
+const tabs=()=>`<div class="tabs">${[['feed','💚',t('Лента','Feed')],['profile','👤',t('Профиль','Profile')],['tasks','🏆',t('Задания','Tasks')]].map(x=>`<button class="${S.view==x[0]?'on':''}" onclick="go('${x[0]}')"><b>${x[1]}</b>${x[2]}</button>`).join('')}</div>`;
+
+function R(){const a=$('#app');
+ if(S.view=='welcome')a.innerHTML=welcome();
+ else if(S.view=='onb')a.innerHTML=onb();
+ else if(S.view=='feed')a.innerHTML=feed()+tabs();
+ else if(S.view=='profile')a.innerHTML=profile()+tabs();
+ else a.innerHTML=tasks()+tabs();
+ if(S.view=='feed')drag()}
+
+const welcome=()=>langBtn()+`<div style="text-align:center;margin:30px 0"><div class="lg" style="justify-content:center;font-size:30px"><i style="width:44px;height:44px"></i></div>
+<h1>${t('Добро пожаловать в GreenSquad!','Welcome to GreenSquad!')}</h1><p class="mt">${t('Найди идеальных тиммейтов в CS2, Dota 2, Valorant, Fortnite и Deadlock','Find perfect teammates in CS2, Dota 2, Valorant, Fortnite and Deadlock')}</p></div>
+${[['⭐',t('Анкеты как в Тиндере','Tinder-style profiles'),t('Свайпай влево или вправо','Swipe left or right')],['💚',t('Взаимные мэтчи','Mutual matches'),t('Контакты открываются при взаимном лайке','Contacts unlock on a mutual like')],['🎯',t('Умная лента','Smart feed'),t('Для серьёзной игры — игроки твоего уровня','For serious play — players at your level')]].map(x=>`<div class="box row" style="justify-content:flex-start"><span style="font-size:22px">${x[0]}</span><div><b>${x[1]}</b><div class="mt" style="margin:2px 0 0">${x[2]}</div></div></div>`).join('')}
+<button class="big" style="margin-top:20px" onclick="S.view='onb';S.step=1;save();R()">${t('Создать анкету →','Create profile →')}</button>`;
+
+function onb(){const p=S.p,s=S.step,ok=nextOk();
+ const head=`${langBtn()}<div class="st">${t('Этап','Step')} ${s} ${t('из','of')} 5</div><div class="bar"><i style="width:${s*20}%"></i></div>`;
+ let b='';
+ if(s==1)b=`<h2>${t('Основная информация','Basic info')}</h2><p class="mt">${t('Укажи ник, возраст и пол','Enter nickname, age and gender')}</p>
+ <label class="l">${t('Никнейм','Nickname')}</label><input value="${esc(p.nick)}" maxlength="20" oninput="S.p.nick=this.value;save();chk()">
+ <label class="l row"><span>${t('Возраст','Age')}</span><span class="pill hl" id="ag">${p.age} ${t('лет','y.o.')}</span></label>
+ <input type="range" min="16" max="30" value="${p.age}" oninput="S.p.age=+this.value;$('#ag').textContent=this.value+' '+t('лет','y.o.');save()">
+ <label class="l">${t('Пол','Gender')}</label><div class="grid"><button class="opt ${p.gender=='m'?'on':''}" onclick="S.p.gender='m';R()">♂ ${t('Парень','Guy')}</button><button class="opt ${p.gender=='f'?'on':''}" onclick="S.p.gender='f';R()">♀ ${t('Девушка','Girl')}</button></div>`;
+ if(s==2)b=`<h2>${t('Твои игры','Your games')}</h2><p class="mt">${t('Выбери одну или несколько игр','Pick one or more games')}</p><div class="grid">${Object.keys(G).map(g=>`<button class="opt ${p.games.includes(g)?'on':''}" onclick="togG('${g}')">${g}</button>`).join('')}</div>`;
+ if(s==3)b=`<h2>${t('Твой уровень','Your skill')}</h2><p class="mt">${t('Укажи звание или рейтинг в каждой игре','Enter your rank or rating for each game')}</p>`+p.games.map(g=>{const k=p.skill[g],d=G[g];
+  return `<div class="box"><b>${g}</b>`+(d.r&&d.k?`<div class="grid" style="margin:10px 0"><button class="opt ${k.t=='r'?'on':''}" onclick="setT('${g}','r')">${t('Звание','Rank')}</button><button class="opt ${k.t=='n'?'on':''}" onclick="setT('${g}','n')">${d.k}</button></div>`:'')+
+  (k.t=='r'?`<div class="rk" style="margin-top:10px">${d.r.map((r,i)=>`<button class="opt ${k.v==i?'on':''}" onclick="setV('${g}',${i})">${r}</button>`).join('')}</div>`:`<input type="number" inputmode="numeric" min="0" max="${d.k=='MMR'?15000:6000}" placeholder="${d.k}" value="${k.v||''}" style="margin-top:10px" oninput="S.p.skill['${g}'].v=+this.value;save();chk()">`)+`</div>`}).join('');
+ if(s==4)b=`<h2>${t('Цели и о себе','Goals & about')}</h2><label class="l">${t('Цель поиска','Looking for')}</label><div class="grid">${GOALS.map(x=>`<button class="opt ${p.goal==x[0]?'on':''}" onclick="S.p.goal='${x[0]}';R()"><div style="font-size:22px">${x[1]}</div>${t(x[2],x[3])}</button>`).join('')}</div>
+ <p class="mt" style="margin-top:10px">${p.goal=='fun'?t('Лента без привязки к скиллу','Feed ignores skill level'):t('Лента подбирается по твоему уровню','Feed is matched to your skill level')}</p>
+ <label class="l row"><span>${t('Комментарий в анкету','About you')}</span><span id="cn">${p.about.length} / 200</span></label><textarea rows="4" maxlength="200" oninput="S.p.about=this.value;$('#cn').textContent=this.value.length+' / 200';save()" placeholder="${t('Роли, прайм-тайм, любимые карты...','Roles, prime time, favorite maps...')}">${esc(p.about)}</textarea>`;
+ if(s==5)b=`<h2>${t('Аватарка и предпросмотр','Photo & preview')}</h2><p class="mt">${t('Загрузи фото из галереи','Upload a photo from your gallery')}</p>
+ <input type="file" accept="image/*" id="fl" hidden onchange="photo(this)"><button class="ghost g" onclick="$('#fl').click()">⬆ ${t('Загрузить фото','Upload photo')}</button>
+ <p class="mt" style="margin:14px 0 8px;text-align:center">${t('ТАК ТВОЮ АНКЕТУ УВИДЯТ В ЛЕНТЕ:','THIS IS HOW YOUR PROFILE LOOKS:')}</p>${card({n:p.nick,a:p.age,g:p.gender,goal:p.goal,about:[p.about,p.about],sk:p.skill,photo:p.photo},1)}`;
+ const nx=s<5?`${t('Далее','Next')} →`:t('Опубликовать анкету','Publish profile');
+ return head+b+`<div class="nav2">${s>1?`<button class="ghost" onclick="S.step--;R()">←</button>`:''}<button class="big" id="nx" ${ok?'':'disabled'} onclick="nxt()">${nx}</button></div>${s==5&&!p.photo?`<p class="mt" style="text-align:center;margin-top:10px;color:var(--lm)">📷 ${t('Загрузи фото, чтобы опубликовать анкету','Upload a photo to publish')}</p>`:''}`}
+function nextOk(){const p=S.p,s=S.step;return s==1?p.nick.trim().length>1:s==2?p.games.length>0:s==3?p.games.every(g=>p.skill[g]&&(p.skill[g].t=='r'||p.skill[g].v>0)):s==5?!!p.photo:true}
+const chk=()=>{const b=$('#nx');if(b)b.disabled=!nextOk()};
+function togG(g){const p=S.p,i=p.games.indexOf(g);if(i>=0){p.games.splice(i,1);delete p.skill[g]}else{p.games.push(g);p.skill[g]=G[g].r?{t:'r',v:0}:{t:'n',v:0}}save();R()}
+function setT(g,x){S.p.skill[g]={t:x,v:0};save();R()}
+function setV(g,i){S.p.skill[g].v=i;save();R()}
+function nxt(){if(S.step<5){S.step++;R();scrollTo(0,0)}else{api('/api/profile',S.p);toast(t('Анкета опубликована!','Profile published!'));go('feed')}}
+function photo(inp){const f=inp.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),k=Math.min(1,600/Math.max(im.width,im.height));c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);S.p.photo=c.toDataURL('image/jpeg',.72);save();R()};im.src=URL.createObjectURL(f)}
+
+function card(m,big){const sk=Object.keys(m.sk),first=sk[0],ab=m.about[S.lang=='ru'?0:1]||m.about[0];
+ const goal=GOALS.find(x=>x[0]==m.goal);
+ return `<div class="card" id="${big?'pv':'cd'}"><div class="row"><span class="pill">👤 ${t('Игрок','Player')}</span>${first?`<span class="pill hl">${first} · ${esc(lvl(first,m.sk[first]))}</span>`:''}</div>
+ <div class="ph" style="${m.photo?`background-image:url(${m.photo})`:''}">${m.photo?'':`<i>${esc((m.n||'?')[0]).toUpperCase()}</i>`}</div>
+ <div class="nm"><b>${esc(m.n)||'—'}</b><span class="sx">${m.g=='m'?'♂':'♀'}</span><span class="pill">${m.a}</span><span class="pill lm" style="margin-left:auto">${t(goal[2],goal[3])}</span></div>
+ <div class="chips">${sk.map(g=>`<span class="pill">${g}: ${esc(lvl(g,m.sk[g]))}</span>`).join('')}</div><p style="color:#cfe0d5">${esc(ab||'')}</p></div>`}
+
+function feed(){const m=Q[qi];
+ return `<div class="row" style="margin-bottom:12px"><div class="lg"><i></i>SQUAD</div><span class="pill hl">${S.p.games.join(' · ')}</span></div>`+
+ (m?card(m)+`<div class="acts"><button onclick="swipe(0)">✕</button><button class="y" onclick="swipe(1)">♥</button><button onclick="qi=Math.max(0,qi-1);R()">↩</button></div>`
+  :`<div class="box" style="text-align:center;padding:40px 16px"><h2>${t('Пока пусто','Nothing yet')}</h2><p class="mt">${t('Подходящие игроки закончились. Загляни позже!','No more matching players. Check back later!')}</p></div>`)}
+function swipe(like){const m=Q[qi];if(!m)return;S.swipes++;api('/api/swipe',{to:m.id,like});
+ if(like&&Math.random()<.3){S.matches++;toast('💚 '+t('Взаимный мэтч с ','Mutual match with ')+m.n+'!')}
+ qi++;save();R()}
+function drag(){const c=$('#cd');if(!c)return;let x0=null;
+ c.onpointerdown=e=>{x0=e.clientX;c.setPointerCapture(e.pointerId);c.style.transition='none'};
+ c.onpointermove=e=>{if(x0==null)return;const d=e.clientX-x0;c.style.transform=`translateX(${d}px) rotate(${d/20}deg)`};
+ c.onpointerup=e=>{if(x0==null)return;const d=e.clientX-x0;x0=null;c.style.transition='';if(d>100)swipe(1);else if(d<-100)swipe(0);else c.style.transform=''}}
+
+function profile(){const p=S.p;
+ return `${langBtn()}<h2 style="text-align:center">${t('Мой профиль','My profile')}</h2><div class="ava" style="${p.photo?`background-image:url(${p.photo})`:''}">${p.photo?'':esc((p.nick||'?')[0]).toUpperCase()}</div>
+ <div style="text-align:center"><b class="lg" style="font-size:26px;justify-content:center">${esc(p.nick)}</b><div class="chips" style="justify-content:center;margin-top:10px"><span class="pill">${p.gender=='m'?'♂':'♀'}</span><span class="pill">${p.age}</span>${p.games.map(g=>`<span class="pill hl">${g}: ${esc(lvl(g,p.skill[g]))}</span>`).join('')}</div></div>
+ <div class="box stats" style="margin-top:14px"><div><b>${S.swipes}</b>${t('Свайпы','Swipes')}</div><div><b>${S.matches}</b>${t('Мэтчи','Matches')}</div><div><b>${p.games.length}</b>${t('Игры','Games')}</div></div>
+ <div class="box"><div class="st">🎯 ${t('Цели поиска','Goals')}</div><div class="chips" style="margin-top:10px">${GOALS.map(x=>`<span class="pill ${p.goal==x[0]?'hl':''}" onclick="S.p.goal='${x[0]}';save();R()">${x[1]} ${t(x[2],x[3])}</span>`).join('')}</div>
+ <label class="l">📝 ${t('О себе','About')}</label><textarea rows="3" maxlength="200" oninput="S.p.about=this.value">${esc(p.about)}</textarea>
+ <button class="big" style="margin-top:12px" onclick="save();api('/api/profile',S.p);toast(t('Сохранено','Saved'))">💾 ${t('Сохранить изменения','Save changes')}</button>
+ <button class="ghost g" onclick="S.view='onb';S.step=1;save();R()">✨ ${t('Пройти регистрацию заново','Redo onboarding')}</button></div>
+ <button class="ghost" style="color:#ff6b6b" onclick="if(confirm(t('Удалить профиль?','Delete profile?'))){localStorage.clear();location.reload()}">🗑 ${t('Удалить профиль','Delete profile')}</button>`}
+
+function tasks(){const T=[['📨',t('Подпишись на канал','Join our channel'),t('Новости проекта и розыгрыши','Project news and giveaways'),0,1],['👆',t('Сделай 20 свайпов за день','Make 20 swipes today'),t('Ежедневный актив в ленте','Daily activity in the feed'),Math.min(S.swipes,20),20],['💚',t('Поймай взаимный мэтч','Get a mutual match'),t('Свайпай и получи взаимную симпатию','Swipe and get a mutual like'),Math.min(S.matches,1),1]];
+ return `<button class="ghost" style="width:auto;margin:0 0 14px" onclick="go('feed')">← ${t('К ленте','To feed')}</button><div class="st" style="font-size:13px;margin-bottom:12px">🏆 ${t('Задания & награды','Tasks & rewards')}</div>`+
+ T.map(x=>`<div class="box"><div class="row" style="justify-content:flex-start"><span style="font-size:26px">${x[0]}</span><div><b>${x[1]}</b><div class="mt" style="margin:2px 0 0">${x[2]}</div></div></div><div class="row" style="margin-top:12px"><span class="mt" style="margin:0">${t('Прогресс','Progress')}: ${x[3]} / ${x[4]}</span><div class="pg"><i style="width:${x[3]/x[4]*100}%"></i></div></div></div>`).join('')+
+ `<div class="box"><div class="st">🎁 ${t('Промокод','Promo code')}</div><div class="row" style="margin-top:10px;flex-wrap:nowrap"><input placeholder="${t('Код...','Code...')}"><button class="big" style="width:auto;padding:14px 18px" onclick="toast(t('Код не найден','Code not found'))">${t('Забрать','Claim')}</button></div></div>`}
+
+if(!S.p.games.length&&S.view!='welcome'&&S.view!='onb')S.view='welcome';
+S.view=='feed'?go('feed'):R();
+</script></body></html>
