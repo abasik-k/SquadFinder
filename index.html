@@ -1,0 +1,346 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SquadFinder</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06100b;--tx:#eafff2;--mt:#8fb3a0;--gl:rgba(255,255,255,.055);--gl2:rgba(255,255,255,.1);--bd:rgba(255,255,255,.13);--hb:rgba(6,16,11,.62);--g:#22e58a;--g2:#10b981;--lm:#c6f432;--sh:0 14px 44px rgba(0,0,0,.5)}
+@media (prefers-color-scheme:light){:root{--bg:#eefaf3;--tx:#06240f;--mt:#4b6b59;--gl:rgba(255,255,255,.72);--gl2:rgba(255,255,255,.95);--bd:rgba(6,36,15,.1);--hb:rgba(238,250,243,.7);--sh:0 14px 36px rgba(16,90,50,.16)}.bg i{opacity:.26!important}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 Manrope,system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.bg i{position:absolute;width:60vmax;height:60vmax;border-radius:50%;filter:blur(90px);opacity:.34;animation:fl 18s ease-in-out infinite alternate}
+.bg i:nth-child(1){background:#10b981;left:-20vmax;top:-22vmax}.bg i:nth-child(2){background:#a3e635;right:-26vmax;top:30vh;animation-duration:24s;opacity:.2}.bg i:nth-child(3){background:#06b6d4;left:8vmax;bottom:-32vmax;animation-duration:30s;opacity:.2}
+@keyframes fl{to{transform:translate(8vmax,6vmax) scale(1.15)}}
+#app{max-width:480px;margin:auto;padding:0 14px 130px}
+button,input,textarea{font-family:Manrope,system-ui,sans-serif}
+h1,h2,.logo,.nm,.stat b,.sq,.ph i,.mmc h2{font-family:Unbounded,Manrope,sans-serif}
+h1{font-size:30px;line-height:1.14;letter-spacing:-.02em;font-weight:700;background:linear-gradient(120deg,var(--tx) 30%,var(--g));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:19px;letter-spacing:-.01em;font-weight:600}
+.mt{color:var(--mt);font-size:13px;margin:6px 0 16px}
+.hd{position:sticky;top:0;z-index:5;max-width:480px;margin:auto;padding:10px 14px;background:var(--hb);backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border-bottom:1px solid var(--bd)}
+.top{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px}
+.logo{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;letter-spacing:0}
+.logo i{width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,var(--g),var(--lm));box-shadow:0 0 18px #22e58a88;position:relative}.logo i::after{content:'';position:absolute;inset:7px;border-radius:50%;background:var(--bg)}
+.lang{display:flex;background:var(--gl);border:1px solid var(--bd);border-radius:999px;padding:3px}.lang span{padding:4px 11px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;color:var(--mt);transition:.25s}.lang .on{background:linear-gradient(135deg,var(--g),var(--lm));color:#05220f}
+.tabs{position:relative;display:grid;grid-template-columns:repeat(3,1fr);background:var(--gl);border:1px solid var(--bd);border-radius:16px;padding:4px}
+.tabs::before{content:'';position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:12px;background:linear-gradient(135deg,var(--g),var(--lm));transform:translateX(calc(var(--i)*100%));transition:transform .45s cubic-bezier(.3,1.3,.5,1);box-shadow:0 4px 18px #22e58a66}
+.tab{position:relative;background:none;border:0;padding:10px 0;font-size:13px;font-weight:600;color:var(--mt);cursor:pointer;transition:color .25s}.tab.on{color:#05220f}
+#app.in>*:not(.act){animation:in .55s cubic-bezier(.2,.8,.2,1) backwards}
+#app.in>*:nth-child(2){animation-delay:.05s}#app.in>*:nth-child(3){animation-delay:.1s}#app.in>*:nth-child(4){animation-delay:.15s}#app.in>*:nth-child(5){animation-delay:.2s}#app.in>*:nth-child(6){animation-delay:.25s}#app.in>*:nth-child(n+7){animation-delay:.3s}
+@keyframes in{from{opacity:0;transform:translateY(16px) scale(.98)}}
+.box{background:var(--gl);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--bd);border-radius:22px;box-shadow:var(--sh);padding:16px;margin:16px 0}
+.feat{display:flex;gap:14px;align-items:center;margin:12px 0}.ic{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#22e58a33,#c6f43233);border:1px solid var(--bd);flex:none}
+.btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:0;border-radius:16px;background:linear-gradient(135deg,var(--g),var(--lm));color:#05220f;font-size:14px;font-weight:700;padding:15px;box-shadow:0 10px 28px #22e58a55,inset 0 1px 0 #fff8;cursor:pointer;transition:transform .15s,box-shadow .2s}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(-130%);animation:sh 3.4s ease-in-out infinite}
+@keyframes sh{60%,100%{transform:translateX(130%)}}
+.btn svg{flex:none}.btn.alt svg{color:#ff5d73}.btn:active{transform:scale(.96)}.btn.alt{background:var(--gl2);color:var(--tx);box-shadow:none;border:1px solid var(--bd)}.btn.alt::after{display:none}.btn:disabled{opacity:.4;filter:grayscale(.6);box-shadow:none}.btn:disabled::after{display:none}
+.tag{display:inline-block;border:1px solid var(--bd);border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600;background:var(--gl);margin:0 5px 5px 0}
+.tag.on{background:var(--lm);color:#1a2a00;border-color:transparent}.tag.g{background:linear-gradient(135deg,#22e58a2e,#c6f4322e);border-color:#22e58a66}
+.tag.pick{cursor:pointer;padding:8px 13px;transition:.2s}.tag.pick.on{background:linear-gradient(135deg,var(--g),var(--lm));box-shadow:0 4px 16px #22e58a55;transform:translateY(-1px)}
+.fl{animation:bob 3.2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-6px)}}
+.li{display:flex;align-items:center;gap:13px;border:1px solid var(--bd);border-radius:18px;background:var(--gl);backdrop-filter:blur(14px);padding:14px;margin-bottom:10px;cursor:pointer;width:100%;text-align:left;font:inherit;font-weight:600;color:inherit;transition:transform .2s,box-shadow .25s,background .25s}
+.li:active{transform:scale(.98)}.li.on{border-color:var(--g);background:linear-gradient(135deg,#22e58a26,#c6f43217);box-shadow:0 0 0 1px var(--g),0 10px 28px #22e58a30}
+.li .ck{width:24px;height:24px;border:2px solid var(--bd);border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;transition:.25s}.li.rd .ck{border-radius:50%}
+.li.on .ck{background:var(--g);border-color:var(--g);color:#05220f;animation:pop .35s}@keyframes pop{50%{transform:scale(1.35)}}
+.li small{display:block;color:var(--mt);font-weight:500;margin-top:2px}
+input,textarea{width:100%;background:var(--gl);border:1px solid var(--bd);border-radius:16px;padding:14px;font:inherit;color:var(--tx);outline:0;transition:.25s}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=range]{-webkit-appearance:none;appearance:none;height:10px;padding:0;border:0;border-radius:9px;background:linear-gradient(90deg,var(--g),var(--lm)) 0/var(--p,30%) 100% no-repeat,var(--gl2)}
+input[type=range]:focus{box-shadow:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:5px solid var(--g);box-shadow:0 4px 16px #22e58a99;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:5px solid var(--g);box-shadow:0 4px 16px #22e58a99;cursor:pointer}
+input:focus,textarea:focus{border-color:var(--g);box-shadow:0 0 0 4px #22e58a26}
+label.l{display:block;font-weight:700;font-size:11px;letter-spacing:.09em;text-transform:uppercase;margin:20px 0 9px;color:var(--mt)}
+.stp{display:flex;align-items:center;background:var(--gl);border:1px solid var(--bd);border-radius:18px;width:fit-content;overflow:hidden}.stp button{width:50px;height:50px;border:0;background:none;color:var(--g);font:700 24px Sora;cursor:pointer}.stp button:active{background:#22e58a22}.stp span{width:70px;text-align:center;font:700 20px Sora}
+.prog{height:6px;border-radius:9px;background:var(--gl2);margin:18px 0 14px;overflow:hidden}.prog i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--g),var(--lm));transition:width .6s cubic-bezier(.2,.9,.3,1);box-shadow:0 0 14px var(--g)}
+.sh small{color:var(--g);font-weight:700;letter-spacing:.1em}
+.act{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:auto;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;background:var(--hb);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid var(--bd);z-index:6}
+.act .btn:first-child{width:84px}.act .btn:last-child{flex:1}
+.chips{display:flex;flex-wrap:wrap;margin:16px 0 12px}
+.card{position:relative;border-radius:30px;overflow:hidden;background:var(--gl);border:1px solid var(--bd);box-shadow:var(--sh);touch-action:pan-y;will-change:transform;margin-bottom:16px}
+#cd{animation:in .5s cubic-bezier(.2,.8,.2,1) backwards}
+.ph{position:relative;aspect-ratio:4/5;background-color:#0a1510;background-image:radial-gradient(circle at 30% 20%,#22e58a55,transparent 60%),linear-gradient(160deg,#0d3b27,#06100b);background-size:cover;background-position:center;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center}
+.ph i{font:700 110px Unbounded;font-style:normal;background:linear-gradient(135deg,var(--g),var(--lm));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 30px #22e58a99)}
+.ph>.tag{position:absolute;left:14px;top:14px;margin:0;background:rgba(0,0,0,.42);backdrop-filter:blur(10px);color:#fff;border-color:rgba(255,255,255,.25)}
+.ov{position:absolute;left:0;right:0;bottom:0;padding:80px 18px 16px;background:linear-gradient(to top,rgba(2,10,6,.94),transparent);color:#fff;display:flex;justify-content:space-between;align-items:baseline}
+.nm{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.stamp{position:absolute;top:22%;left:50%;display:flex;align-items:center;gap:9px;padding:11px 20px;border-radius:999px;font:800 16px Manrope,sans-serif;letter-spacing:.01em;white-space:nowrap;opacity:0;pointer-events:none;transform:translateX(-50%)}
+.stamp.l{background:linear-gradient(135deg,var(--g),var(--lm));color:#05220f;box-shadow:0 10px 34px #22e58a99}
+.stamp.n{background:#ff5d73;color:#fff;box-shadow:0 10px 34px #ff5d7388}
+.in{padding:14px 16px 8px}.gr{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--bd)}.gr:first-child{border:0}.gr>.tag{margin:0;min-width:74px;text-align:center}.gr b{font-size:14px}.rl{margin-top:6px}.ab{margin:10px 0 8px;color:var(--mt)}
+.two{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;margin-top:6px}
+.ulink{text-align:center;margin-top:18px;cursor:pointer;color:var(--mt);font-weight:600;font-size:13px}
+.empty{text-align:center;padding:44px 16px}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.stat div{background:var(--gl);backdrop-filter:blur(14px);border:1px solid var(--bd);border-radius:20px;padding:14px 8px;text-align:center;color:var(--mt);font-size:12px}.stat b{display:block;font-size:24px;font-weight:600;background:linear-gradient(135deg,var(--g),var(--lm));-webkit-background-clip:text;background-clip:text;color:transparent}
+.banner{height:110px;border-radius:26px;margin-top:18px;background:radial-gradient(circle at 80% 20%,#c6f43288,transparent 55%),linear-gradient(135deg,#0f9f6c,#22e58a);position:relative;overflow:hidden;box-shadow:var(--sh)}
+.sq{width:100px;height:100px;border-radius:28px;border:4px solid var(--bg);background-color:var(--g);background-image:linear-gradient(135deg,var(--g),var(--lm));background-size:cover;background-position:center;background-repeat:no-repeat;margin:-50px 0 0 18px;position:relative;display:flex;align-items:center;justify-content:center;font:700 34px Unbounded;color:#05220f;box-shadow:0 10px 30px #22e58a55}
+table{width:100%;border-collapse:collapse}td{border-top:1px solid var(--bd);padding:10px 4px 10px 0;vertical-align:top;font-size:13px}tr:first-child td{border:0}td:first-child{font-weight:700;width:74px}
+.mis{display:flex;gap:12px;align-items:center}.mis .pg{height:10px;border-radius:9px;background:var(--gl2);flex:1;overflow:hidden}.mis .pg i{display:block;height:100%;background:linear-gradient(90deg,var(--g),var(--lm));border-radius:9px;box-shadow:0 0 12px var(--g);transition:width 1s cubic-bezier(.2,.9,.3,1)}
+#toast{position:fixed;top:78px;left:50%;transform:translate(-50%,-10px);background:var(--hb);backdrop-filter:blur(20px);border:1px solid var(--g);color:var(--tx);padding:12px 18px;border-radius:24px;opacity:0;pointer-events:none;transition:.3s;z-index:60;max-width:90%;text-align:center;font-weight:600;line-height:1.35}#toast.on{opacity:1;transform:translate(-50%,0)}
+.hint{font-size:12px;color:var(--mt);margin-top:8px}
+.mm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(2,10,6,.78);backdrop-filter:blur(12px);animation:fade .3s;padding:20px}@keyframes fade{from{opacity:0}}
+.mmc{background:var(--hb);border:1px solid var(--g);border-radius:28px;padding:28px 24px;text-align:center;max-width:340px;width:100%;box-shadow:0 0 70px #22e58a55;animation:zoom .5s cubic-bezier(.2,1.4,.4,1)}@keyframes zoom{from{transform:scale(.6);opacity:0}}
+.cf{position:fixed;top:-20px;width:9px;height:15px;border-radius:2px;z-index:31;animation:fall linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.rt{display:flex;align-items:center;gap:8px}
+.fbb{width:34px;height:34px;border-radius:50%;border:1px solid var(--bd);background:var(--gl);color:var(--mt);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:.2s}.fbb:active{transform:scale(.92)}.fbb:hover{color:var(--g);border-color:var(--g)}
+.ad{position:relative;display:flex;align-items:center;gap:12px;width:100%;margin:2px 0 14px;padding:11px 14px;border-radius:18px;border:1.5px dashed #22e58a77;background:linear-gradient(135deg,#22e58a14,#c6f43214);color:var(--tx);cursor:pointer;text-align:left;font:inherit;overflow:hidden;transition:.2s}
+.ad:active{transform:scale(.98)}.ad:hover{border-color:var(--g)}
+.ad i{font:700 9px Manrope,sans-serif;font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:var(--mt);border:1px solid var(--bd);border-radius:999px;padding:3px 8px;flex:none}
+.ad b{display:block;font-size:13px;font-weight:700;line-height:1.25}.ad small{display:block;color:var(--mt);font-size:11px;font-weight:500;margin-top:1px}
+.ad svg{flex:none;margin-left:auto;color:var(--g)}
+.fbm textarea{resize:none}
+button,.li,.tag,.lang span,.ulink,.tab,label.btn,.ad,.fbb{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.btn::after,.stamp,.cf,.tabs::before,.bg{pointer-events:none}
+.card{-webkit-user-select:none;user-select:none}
+@media (hover:none),(pointer:coarse){
+ .bg i{animation:none;filter:blur(50px)}
+ .btn::after{display:none}.fl{animation:none}
+ .box,.li,.stat div,.card,.tabs,.lang,.fbb,.mmc,.mm,.hd,.act,#toast{backdrop-filter:none;-webkit-backdrop-filter:none}
+ .hd,.act,.mmc,#toast{background:var(--bg)}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+</style></head><body><div class="bg"><i></i><i></i><i></i></div><div class="hd" id="hdw"></div><div id="app"></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),tgw=window.Telegram&&Telegram.WebApp;tgw&&(tgw.ready(),tgw.expand());
+const API_FIXED='https://185-130-224-64.sslip.io'; // постоянный адрес вашего сервера (https://...). Если пусто — адрес берётся из ?api= (его передаёт бот)
+const API=(()=>{if(API_FIXED)return API_FIXED.replace(/\/$/,'');
+ try{const a=new URLSearchParams(location.search).get('api');if(a){const u=new URL(a);if(u.protocol==='https:'&&u.hostname.endsWith('.trycloudflare.com'))return u.origin}}catch(e){}
+ return ''})(); // пусто = демо-режим без сервера
+let S;try{S=JSON.parse(localStorage.su2)}catch(e){}
+S=S||{lang:'ru',view:'welcome',step:1,swipes:0,matches:0,p:{nick:'',age:18,gender:'m',games:[],skill:{},roles:{},goal:'fun',about:'',photo:''}};
+const save=()=>{if(window.__del)return;try{localStorage.su2=JSON.stringify(S)}catch(e){}};
+const t=(r,e)=>S.lang=='ru'?r:e,esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast=m=>{const e=$('#toast');e.textContent=m;e.className='on';clearTimeout(toast.t);toast.t=setTimeout(()=>e.className='',Math.max(2200,String(m).length*60))};
+const hap=(k='light')=>{try{tgw&&tgw.HapticFeedback&&tgw.HapticFeedback.impactOccurred(k)}catch(e){}};
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.btn,.li,.tag,.tab,.stp button'))hap()});
+const pushProfile=()=>api('/api/profile',{...S.p,lang:S.lang}).then(r=>{S.synced=(r&&r.ok)?1:0;save();return r});
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* запросы к боту: при обрыве связи (туннель мигнул, ответ 530/1033) повторяем до 3 раз; отзыв — один раз, чтобы не продублировать */
+const api=async(p,b)=>{if(!API)return null;const tries=p=='/api/feedback'?1:3;
+ for(let i=0;i<tries;i++){const c=new AbortController(),to=setTimeout(()=>c.abort(),12000);
+  try{const r=await fetch(API+p,{method:'POST',signal:c.signal,headers:{'Content-Type':'application/json','X-Init':(tgw&&tgw.initData)||''},body:JSON.stringify(b)});clearTimeout(to);return await r.json()}catch(e){clearTimeout(to)}
+  if(i<tries-1)await sleep(1500*(i+1))}
+ return null};
+
+/* Данные игр (проверенные источники: Liquipedia, Valve/Epic/Riot, профильные гайды).
+   Способы указать уровень (modes): num — число (max/div — предел ввода и «потолок» для сортировки), r — список званий */
+const IX='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const IH='<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+const MODES={
+ premier:{n:['Premier — CS Rating','Premier — CS Rating'],num:{ph:'CS Rating',max:35000,div:25000}},
+ faceit:{n:['Faceit — ELO','Faceit — ELO'],num:{ph:'Faceit ELO',max:6000,div:3000}},
+ comp:{n:['Звание (Competitive)','Competitive rank'],r:['Silver','Gold Nova','Master Guardian','Legendary Eagle','Supreme','Global Elite']},
+ mmr:{n:['MMR','MMR'],num:{ph:'MMR',max:15000,div:9000}},
+ rank:{n:['Звание','Rank']}};
+const TIERS=[[30000,'Gold','Золотой'],[25000,'Red','Красный'],[20000,'Pink','Розовый'],[15000,'Purple','Фиолетовый'],[10000,'Blue','Синий'],[5000,'Light Blue','Голубой'],[0,'Grey','Серый']];
+const G={
+'CS2':{modes:['premier','faceit','comp'],roles:[['IGL','Капитан','IGL'],['Entry','Энтри-фраггер','Entry fragger'],['AWPer','Снайпер','AWPer'],['Rifler','Рифлер','Rifler'],['Lurker','Люркер','Lurker'],['Support','Саппорт','Support'],['Anchor','Опорник','Anchor']]},
+'Dota 2':{modes:['mmr'],roles:[['1','1 · Керри','1 · Carry'],['2','2 · Мид','2 · Midlaner'],['3','3 · Оффлейнер','3 · Offlaner'],['4','4 · Софт-саппорт','4 · Soft support'],['5','5 · Фулл-саппорт','5 · Hard support']]},
+'Valorant':{modes:['rank'],r:['Iron','Bronze','Silver','Gold','Platinum','Diamond','Ascendant','Immortal','Radiant'],roles:[['Duelist','Дуэлянт','Duelist'],['Initiator','Инициатор','Initiator'],['Controller','Контроллер','Controller'],['Sentinel','Страж','Sentinel']]},
+'Fortnite':{modes:['rank'],r:['Bronze','Silver','Gold','Platinum','Diamond','Elite','Champion','Unreal'],roles:[['IGL','Шотколлер','Shotcaller'],['Fragger','Фраггер','Fragger'],['Support','Саппорт','Support'],['Builder','Билдер','Builder'],['Flex','Скаут / универсал','Scout / flex']]},
+'Deadlock':{modes:['rank'],r:['Initiate','Seeker','Acolyte','Sentinel','Mystic','Ritualist','Emissary','Oracle','Phantom','Ascendant','Eternus'],roles:[['P1','1 · Главный кэрри','1 · Main carry'],['P2','2 · Мид-кэрри','2 · Mid carry'],['P3','3 · Инициатор / Танк','3 · Initiator / Tank'],['P4','4 · Полусаппорт / Роумер','4 · Semi-support / Roamer'],['P5','5 · Саппорт команды','5 · Team support'],['P6','6 · Полный саппорт','6 · Full support']]}};
+const GOALS=[['fun','Просто для фана','Just for fun','Без привязки к скиллу','No skill matching'],['ranked','Ранкед-стак','Ranked stack','Подбор по твоему уровню','Matched to your level'],['tour','Турниры','Tournaments','Подбор по твоему уровню','Matched to your level'],['team','Постоянная команда','Full team','Подбор по твоему уровню','Matched to your level']];
+
+const ranksOf=(g,m)=>m=='comp'?MODES.comp.r:G[g].r,isNum=m=>!!(m&&MODES[m].num);
+const valid=(g)=>{const s=S.p.skill[g];return s&&s.m&&(isNum(s.m)?s.v>0:s.v>=0)};
+const score=(g,s)=>isNum(s.m)?Math.min(s.v/MODES[s.m].num.div,1)*100:s.v/(ranksOf(g,s.m).length-1)*100;
+const lvl=(g,s)=>{if(!s||!s.m)return'—';if(isNum(s.m)){const x=s.m=='premier'?' ('+tier(s.v)+')':'';return MODES[s.m].num.ph+' '+s.v+x}return ranksOf(g,s.m)[s.v]};
+const tier=v=>{const x=TIERS.find(a=>v>=a[0]);return t(x[2],x[1])};
+const roleName=(g,id)=>{const r=G[g].roles.find(x=>x[0]==id);return r?t(r[1],r[2]):id};
+
+const MOCK=[
+{n:'Zaryad',a:19,g:'m',goal:'ranked',about:['Ищу катки по вечерам','Looking for evening games'],sk:{'CS2':{m:'faceit',v:1650},'Valorant':{m:'rank',v:3}},rl:{'CS2':['Entry'],'Valorant':['Duelist']}},
+{n:'Mira',a:20,g:'f',goal:'fun',about:['Играю для души, без токсиков','Chill games, no toxicity'],sk:{'Valorant':{m:'rank',v:2},'Fortnite':{m:'rank',v:3}},rl:{'Valorant':['Controller'],'Fortnite':['Support']}},
+{n:'Nord',a:22,g:'m',goal:'tour',about:['Нужна команда на турниры','Need a team for tournaments'],sk:{'Dota 2':{m:'mmr',v:5200}},rl:{'Dota 2':['3']}},
+{n:'Kiro',a:17,g:'m',goal:'fun',about:['Дота и расслабон','Dota and relax'],sk:{'Dota 2':{m:'mmr',v:2100},'Deadlock':{m:'rank',v:2}},rl:{'Dota 2':['5'],'Deadlock':['P5']}},
+{n:'Vexa',a:21,g:'f',goal:'team',about:['IGL, собираю состав','IGL building a roster'],sk:{'CS2':{m:'premier',v:18500},'Valorant':{m:'rank',v:5}},rl:{'CS2':['IGL'],'Valorant':['Initiator']}},
+{n:'Bolt',a:18,g:'m',goal:'ranked',about:['Деадлок, вечером онлайн','Deadlock, online evenings'],sk:{'Deadlock':{m:'rank',v:6}},rl:{'Deadlock':['P1']}},
+{n:'Sky',a:24,g:'m',goal:'fun',about:['Фортнайт с друзьями','Fortnite with friends'],sk:{'Fortnite':{m:'rank',v:5},'CS2':{m:'comp',v:1}},rl:{'Fortnite':['Fragger'],'CS2':['Rifler']}},
+{n:'Raze',a:23,g:'f',goal:'ranked',about:['Радиант-стремящаяся','Aiming for Radiant'],sk:{'Valorant':{m:'rank',v:7}},rl:{'Valorant':['Duelist']}}];
+
+let Q=[],qi=0;
+const localQ=()=>{const me=S.p;let c=MOCK.filter(m=>Object.keys(m.sk).some(g=>me.games.includes(g)));
+ const d=m=>Math.min(...Object.keys(m.sk).filter(g=>me.games.includes(g)).map(g=>Math.abs(score(g,m.sk[g])-score(g,me.skill[g]))));
+ if(me.goal=='fun')c.sort(()=>Math.random()-.5);else c.sort((a,b)=>d(a)-d(b)); // фан — без сортировки по скиллу; иначе ±по уровню
+ return c};
+let F={err:null,stats:null,again:0};
+async function loadQ(){F.err=null;F.stats=null;qi=0;
+ if(API&&!S.synced){const pr=await pushProfile();if(!(pr&&pr.ok)){F.err=!pr?'net':pr.error=='auth'?'auth':pr.error=='bad profile'?'bad':'srv';Q=[];return}}
+ const r=await api('/api/feed',{goal:S.p.goal,skill:S.p.skill,roles:S.p.roles,games:S.p.games,again:F.again?1:0});F.again=0;
+ if(!API){Q=localQ();return}
+ if(!r)F.err='net';else if(r.error)F.err=r.error=='auth'?'auth':'srv';
+ Q=(r&&r.items)||[];F.stats=(r&&r.stats)||null}
+function go(v){S.view=v;save();if(v=='feed')loadQ().then(()=>{R();checkMatches()});else R();scrollTo(0,0)}
+const setL=l=>{S.lang=l;save();R()};
+
+const IDS=['feed','profile','tasks'];
+function head(show){return `<div class="top"><div class="logo"><i></i>SquadFinder</div><div class="rt"><button class="fbb" onclick="askFb()" aria-label="Feedback" title="${t('Обратная связь','Feedback')}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></button><div class="lang"><span class="${S.lang=='ru'?'on':''}" onclick="setL('ru')">RU</span><span class="${S.lang=='en'?'on':''}" onclick="setL('en')">EN</span></div></div></div>`+
+ (show?`<div class="tabs">${[['feed',t('Лента','Feed')],['profile',t('Профиль','Profile')],['tasks',t('Миссии','Missions')]].map(x=>`<button class="tab" onclick="go('${x[0]}')">${x[1]}</button>`).join('')}</div>`:'')}
+function setHead(show){const w=$('#hdw'),k=S.lang+show;if(w.dataset.k!=k){w.innerHTML=head(show);w.dataset.k=k}
+ const tb=w.querySelector('.tabs');if(tb){tb.style.setProperty('--i',Math.max(0,IDS.indexOf(S.view)));tb.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',IDS[i]==S.view))}}
+function countUp(){document.querySelectorAll('.cnt').forEach(e=>{const n=+e.dataset.n||0;let i=0;const st=()=>{i++;e.textContent=Math.round(n*Math.min(i/24,1));if(i<24)requestAnimationFrame(st)};st()})}
+function R(){const a=$('#app'),v=S.view;setHead(IDS.includes(v));
+ const k=v+(v=='onb'?S.step:'');a.className=k!=R.k?'in':'';R.k=k;
+ a.innerHTML=v=='welcome'?welcome():v=='onb'?onb():v=='feed'?feed():v=='profile'?profile():v=='edit'?editView():tasks();
+ if(v=='feed')drag();countUp()}
+
+const welcome=()=>`<div style="margin-top:30px"><span class="tag g">✦ ${t('Поиск тиммейтов','Teammate finder')}</span></div><h1 style="margin-top:14px">${t('Найди свой сквад','Find your squad')}</h1><p class="mt">${t('Тиммейты для CS2, Dota 2, Valorant, Fortnite и Deadlock. Без токсиков и случайных пабов.','Teammates for CS2, Dota 2, Valorant, Fortnite and Deadlock. No toxicity, no random pubs.')}</p>
+<div style="margin:0 0 18px">${Object.keys(G).map((g,i)=>`<span class="tag fl" style="animation-delay:${i*.35}s">${g}</span>`).join('')}</div>
+${[['🎮',t('Анкета за минуту','Profile in a minute'),t('Игры, звание или рейтинг, роли','Games, rank or rating, roles')],['🎯',t('Лента под твою цель','Feed that fits your goal'),t('Для фана — любые игроки, для серьёзной игры — твой уровень','Fun — anyone, serious — your skill level')],['🤝',t('Контакты по взаимному лайку','Contacts on mutual like'),t('Никто не напишет, пока вы оба не согласны','No one can message you until you both agree')]].map(x=>`<div class="box feat"><div class="ic">${x[0]}</div><div><b>${x[1]}</b><div class="mt" style="margin:3px 0 0">${x[2]}</div></div></div>`).join('')}
+<button class="btn" style="margin-top:10px" onclick="S.view='onb';S.step=1;save();R()">${t('Создать анкету','Create profile')} →</button>`;
+
+const STEPS=[['Профиль','Profile'],['Игры','Games'],['Уровень','Skill'],['Роли','Roles'],['Цель и фото','Goal & photo']];
+function onb(){const p=S.p,s=S.step;let b='';
+ if(s==1)b=`<label class="l">${t('Никнейм','Nickname')}</label><input value="${esc(p.nick)}" maxlength="20" enterkeyhint="next" oninput="S.p.nick=this.value;save();chk()">
+ <label class="l" style="display:flex;justify-content:space-between;align-items:center"><span>${t('Возраст','Age')}</span><span class="tag g" id="ag" style="margin:0;font-size:13px">${p.age} ${t('лет','y.o.')}</span></label><input type="range" min="16" max="40" value="${p.age}" style="--p:${(p.age-16)/24*100}%" oninput="S.p.age=+this.value;this.style.setProperty('--p',(this.value-16)/24*100+'%');$('#ag').textContent=this.value+' '+t('лет','y.o.');save();chk()">
+ <label class="l">${t('Пол','Gender')}</label>${[['m',t('Парень','Guy')],['f',t('Девушка','Girl')]].map(x=>`<button class="li rd ${p.gender==x[0]?'on':''}" onclick="S.p.gender='${x[0]}';save();R()"><span class="ck">${p.gender==x[0]?'●':''}</span>${x[1]}</button>`).join('')}`;
+ if(s==2)b=`<p class="mt">${t('Выбери одну или несколько игр','Pick one or more games')}</p>`+Object.keys(G).map(g=>`<button class="li ${p.games.includes(g)?'on':''}" onclick="togG('${g}')"><span class="ck">${p.games.includes(g)?'✓':''}</span><b>${g}</b></button>`).join('');
+ if(s==3)b=p.games.map(g=>skillBox(g)).join('');
+ if(s==4)b=`<p class="mt">${t('До двух ролей в каждой игре','Up to two roles per game')}</p>`+p.games.map(g=>{const rs=p.roles[g]||[];return `<div class="box"><b style="font-size:18px">${g}</b><div style="margin-top:12px">${G[g].roles.map(r=>`<button class="li ${rs.includes(r[0])?'on':''}" onclick="togR('${g}','${r[0]}')"><span class="ck">${rs.includes(r[0])?'✓':''}</span>${t(r[1],r[2])}</button>`).join('')}</div></div>`}).join('');
+ if(s==5)b=`<label class="l">${t('Цель поиска','Looking for')}</label>${GOALS.map(x=>`<button class="li rd ${p.goal==x[0]?'on':''}" onclick="S.p.goal='${x[0]}';save();R()"><span class="ck">${p.goal==x[0]?'●':''}</span><div>${t(x[1],x[2])}<small>${t(x[3],x[4])}</small></div></button>`).join('')}
+ <label class="l">${t('О себе','About')} <span id="cn">${p.about.length}/200</span></label><textarea rows="3" maxlength="200" oninput="S.p.about=this.value;$('#cn').textContent=this.value.length+'/200';save()" placeholder="${t('Прайм-тайм, любимые карты, манера игры...','Prime time, favorite maps, playstyle...')}">${esc(p.about)}</textarea>
+ <label class="l">${t('Фото (по желанию)','Photo (optional)')}</label><input type="file" accept="image/*" id="fl" onchange="photo(this)" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"><label for="fl" class="btn alt" style="cursor:pointer">${p.photo?t('Заменить фото','Change photo'):t('Загрузить фото','Upload photo')}</label>
+ <label class="l">${t('Так тебя увидят в ленте','Your card in the feed')}</label>${card({n:p.nick,a:p.age,g:p.gender,goal:p.goal,about:[p.about,p.about],sk:p.skill,rl:p.roles,photo:p.photo})}`;
+ return `<div class="prog"><i style="width:${s*20}%"></i></div><div class="sh"><small>${t('ЭТАП','STEP')} ${s}/5</small><h2>${t(STEPS[s-1][0],STEPS[s-1][1])}</h2></div>${b}
+ <div class="act">${s>1?`<button class="btn alt" onclick="S.step--;R();scrollTo(0,0)">←</button>`:`<button class="btn alt" onclick="S.view='welcome';R()">✕</button>`}<button class="btn" id="nx" ${ok()?'':'disabled'} onclick="nxt()">${s<5?t('Далее','Next')+' →':t('Опубликовать','Publish')}</button></div>`}
+
+/* Блок «уровень»: сначала выбираешь ОДИН способ (для CS2 — Premier / Faceit / звание), и только потом появляется ввод */
+function skillBox(g){const d=G[g],s=S.p.skill[g];
+ let h=`<div class="box"><b style="font-size:18px">${g}</b>`;
+ if(d.modes.length>1)h+=`<label class="l" style="margin-top:12px">${t('Чем подтвердишь уровень? Выбери одно','Pick ONE way to show your level')}</label>`+d.modes.map(m=>`<button class="li rd ${s.m==m?'on':''}" onclick="setM('${g}','${m}')"><span class="ck">${s.m==m?'●':''}</span>${t(MODES[m].n[0],MODES[m].n[1])}</button>`).join('');
+ if(s.m){const M=MODES[s.m];
+  if(M.num)h+=`<label class="l">${M.num.ph}</label><input type="number" inputmode="numeric" enterkeyhint="next" min="1" max="${M.num.max}" value="${s.v||''}" placeholder="${M.num.ph}" oninput="S.p.skill['${g}'].v=Math.min(+this.value||0,${M.num.max});save();chk();${s.m=='premier'?`$('#tr').textContent=this.value>0?tier(+this.value):''`:''}">`+(s.m=='premier'?`<div class="hint">${t('Цвет рейтинга','Rating colour')}: <b id="tr">${s.v>0?tier(s.v):''}</b></div>`:'');
+  else h+=`<label class="l">${t('Звание','Rank')}</label><div>${ranksOf(g,s.m).map((r,i)=>`<span class="tag pick ${s.v==i?'on':''}" onclick="setV('${g}',${i})">${r}</span>`).join('')}</div>`}
+ return h+`</div>`}
+const ok=()=>{const p=S.p,s=S.step;return s==1?p.nick.trim().length>1&&p.age>=16&&p.age<=60:s==2?p.games.length>0:s==3?p.games.every(valid):s==4?p.games.every(g=>(p.roles[g]||[]).length>0):true};
+const okAll=()=>{const p=S.p;return p.nick.trim().length>1&&p.age>=16&&p.age<=60&&p.games.length>0&&p.games.every(valid)&&p.games.every(g=>(p.roles[g]||[]).length>0)};
+const chk=()=>{const b=$('#nx');if(b)b.disabled=!(S.view=='edit'?okAll():ok())};
+function togG(g){const p=S.p,i=p.games.indexOf(g);if(i>=0){p.games.splice(i,1);delete p.skill[g];delete p.roles[g]}else{p.games.push(g);const m=G[g].modes.length==1?G[g].modes[0]:'';p.skill[g]={m,v:isNum(m)?0:-1};p.roles[g]=[]}save();R()}
+function setM(g,m){S.p.skill[g]={m,v:isNum(m)?0:-1};save();R()}
+function setV(g,i){S.p.skill[g].v=i;save();R()}
+function togR(g,id){const a=S.p.roles[g],i=a.indexOf(id);if(i>=0)a.splice(i,1);else{if(a.length>=2)a.shift();a.push(id)}save();R()}
+function nxt(){if(S.step<5){S.step++;R();scrollTo(0,0)}else{askWrite();pushProfile();toast(t('Анкета опубликована','Profile published'));go('feed')}}
+function photo(inp){const f=inp.files&&inp.files[0];if(!f)return;
+ const fail=()=>toast(t('Не удалось открыть фото. Попробуй JPG или PNG','Could not open the photo. Try JPG or PNG'));
+ const r=new FileReader();r.onerror=fail;
+ r.onload=()=>{const im=new Image();im.onerror=fail;
+  im.onload=()=>{try{const c=document.createElement('canvas'),k=Math.min(1,640/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);S.p.photo=c.toDataURL('image/jpeg',.78);save();R();toast(t('Фото загружено','Photo added'))}catch(e){fail()}};
+  im.src=r.result};
+ r.readAsDataURL(f)}
+
+function card(m,live){const gs=Object.keys(m.sk),goal=GOALS.find(x=>x[0]==m.goal),ab=m.about[S.lang=='ru'?0:1]||m.about[0];
+ return `<div class="card" ${live?'id="cd"':''}><div class="ph" style="${m.photo?`background-image:url(${m.photo});background-size:cover;background-position:center;background-repeat:no-repeat`:''}">${m.photo?'':`<i>${esc((m.n||'?')[0]).toUpperCase()}</i>`}<span class="tag">${t(goal[1],goal[2])}</span>${live?`<span class="stamp l" id="sl">${IH} ${t('Го играть','Let’s play')}</span><span class="stamp n" id="sn">${IX} ${t('Мимо','Pass')}</span>`:''}<div class="ov"><b class="nm">${esc(m.n)||'—'}</b><span>${m.g=='m'?'♂':'♀'} ${m.a}</span></div></div>
+ <div class="in">${gs.map(g=>`<div class="gr"><span class="tag g">${g}</span><div><b>${esc(lvl(g,m.sk[g]))}</b><div class="rl">${(m.rl[g]||[]).map(r=>`<span class="tag">${esc(roleName(g,r))}</span>`).join('')}</div></div></div>`).join('')}${ab?`<p class="ab">${esc(ab)}</p>`:''}</div></div>`}
+
+const adBanner=()=>`<button class="ad" onclick="askFb('${t('Реклама: ','Advertising: ')}')"><i>${t('Реклама','Ad')}</i><span><b>${t('Тут вы можете разместить свою рекламу','Your ad could be here')}</b><small>${t('Нажми, чтобы написать нам','Tap to contact us')}</small></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>`;
+function askFb(pre){if(document.querySelector('.fbm'))return;const d=document.createElement('div');d.className='mm fbm';
+ d.innerHTML=`<div class="mmc" style="text-align:left"><h2>✉️ ${t('Обратная связь','Feedback')}</h2><p class="mt">${t('Идея, ошибка или вопрос — напиши, мы прочитаем.','An idea, a bug or a question — write to us.')}</p><textarea id="fbt" rows="5" maxlength="1000" placeholder="${t('Твоё сообщение...','Your message...')}" oninput="$('#fbc').textContent=this.value.length+'/1000'">${esc(pre||'')}</textarea><div class="hint" style="display:flex;justify-content:space-between"><span id="fbc">${(pre||'').length}/1000</span><span>Ctrl+Enter</span></div><button class="btn" id="fbs" style="margin-top:12px" onclick="sendFb()">${t('Отправить','Send')}</button><button class="btn alt" style="margin-top:10px" onclick="this.closest('.mm').remove()">${t('Отмена','Cancel')}</button></div>`;
+ document.body.appendChild(d);setTimeout(()=>{const e=$('#fbt');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},60)}
+async function sendFb(){const e=$('#fbt'),b=$('#fbs');if(!e||!b||b.disabled)return;const x=e.value.trim();
+ if(x.length<2)return toast(t('Напиши пару слов','Write a few words'));
+ if(!API)return toast(t('Обратная связь работает при подключённом боте','Feedback needs the bot connected'));
+ b.disabled=true;const r=await api('/api/feedback',{text:x});b.disabled=false;
+ if(r&&r.ok){const m=document.querySelector('.fbm');m&&m.remove();toast(t('Спасибо! Сообщение отправлено','Thanks! Message sent'))}
+ else toast(!r?t('Нет связи с ботом. Проверь, что бот запущен, и открой приложение заново через /start','No connection to the bot. Make sure it is running and reopen the app via /start')
+  :r.error=='auth'?t('Сессия устарела. Закрой приложение и открой заново через бота','Session expired. Close the app and reopen it via the bot')
+  :r.error=='rate'?t('Слишком часто, подожди немного','Too fast, wait a bit')
+  :r.error=='long'?t('Слишком длинно, до 1000 символов','Too long, up to 1000 characters')
+  :t('Не удалось отправить. Попробуй ещё раз','Could not send. Try again'))}
+
+function feed(){const m=Q[qi];
+ return `<div class="chips">${S.p.games.map(g=>`<span class="tag g">${g}</span>`).join('')}</div>`+adBanner()+
+ (m?card(m,1)+`<div class="two"><button class="btn alt" onclick="swipe(0)">${IX} ${t('Мимо','Pass')}</button><button class="btn" onclick="swipe(1)">${IH} ${t('Го играть','Let’s play')}</button></div><div class="ulink" onclick="qi=Math.max(0,qi-1);R()">↩ ${t('Вернуть прошлую анкету','Undo last')}</div>`
+  :emptyBox())}
+function emptyBox(){const st=F.stats;let e='🛰️',h=t('Пока пусто','Nothing yet'),p=t('Подходящие игроки закончились. Загляни позже!','No more matching players. Check back later!'),b='';
+ const retry=`<button class="btn" style="margin-top:16px" onclick="go('feed')">${t('Повторить','Retry')}</button>`;
+ if(F.err){e='📡';h=t('Нет связи с ботом','No connection to the bot');b=retry;
+  p=F.err=='auth'?t('Сессия устарела. Закрой приложение и открой его заново кнопкой из чата с ботом (/start).','Session expired. Close the app and reopen it from the bot chat (/start).')
+   :F.err=='bad'?t('Сервер не принял анкету. Открой «Профиль» → «Редактировать анкету», проверь уровень и роли и сохрани.','The server rejected your profile. Open Profile → Edit and check level and roles.')
+   :F.err=='srv'?t('Ошибка на сервере. Попробуй ещё раз чуть позже.','Server error. Try again a bit later.')
+   :t('Бот выключен или адрес устарел. Проверь, что бот запущен, и открой приложение заново через /start. Кнопки в старых сообщениях ведут на старый адрес.','The bot is off or the address is outdated. Make sure the bot is running and reopen the app via /start. Buttons in old messages point to an old address.')}
+ else if(st&&!st.others){e='🌱';h=t('Ты пока первый','You are the first one');p=t('Других анкет ещё нет. Позови друзей в бота — их анкеты появятся здесь.','There are no other profiles yet. Invite friends to the bot — their profiles will show up here.')}
+ else if(st&&!st.shared){e='🎯';h=t('Нет игроков с твоими играми','No players with your games');p=t('Другие игроки выбрали другие игры. Добавь ещё игру в профиле или зайди позже.','Other players picked different games. Add another game in your profile or check back later.')}
+ else if(st&&(st.passed||st.liked)){e='✅';h=t('Ты посмотрел всех','You have seen everyone');p=t(`Подходящих анкет: ${st.shared}. Пропущено: ${st.passed}, лайков: ${st.liked}.`,`Matching profiles: ${st.shared}. Passed: ${st.passed}, liked: ${st.liked}.`);
+  if(st.passed)b=`<button class="btn" style="margin-top:16px" onclick="F.again=1;go('feed')">${t('Показать пропущенных снова','Show passed again')}</button>`}
+ return `<div class="box empty"><div style="font-size:44px">${e}</div><h2 style="margin-top:8px">${h}</h2><p class="mt" style="margin-bottom:0">${p}</p>${b}</div>`}
+function swipe(like){const m=Q[qi];if(!m)return;S.swipes++;qi++;save();R();hap(like?'medium':'light');
+ api('/api/swipe',{to:m.id,like:!!like}).then(r=>{const hit=API?!!(r&&r.match):(like&&Math.random()<.3);if(hit){S.matches++;save();showMatch(m,r&&r.contact,r&&r.username)}})}
+function showMatch(m,c,u){const d=document.createElement('div');d.className='mm';
+ d.innerHTML=`<div class="mmc"><div style="font-size:54px">💚</div><h2>${t('Это мэтч!','It’s a match!')}</h2><p class="mt">${t('Вы с ','You and ')}<b>${esc(m.n)}</b>${t(' хотите играть вместе',' want to play together')}</p>${u?`<button class="btn" style="margin-bottom:10px" onclick="openChat('${esc(u)}')">${t('Написать','Message')} ${esc(c||'')}</button>`:`<p class="mt">${t('Контакт мы отправили тебе в чат с ботом','We sent the contact to your chat with the bot')}</p>`}<button class="btn alt" onclick="this.closest('.mm').remove()">${t('Продолжить','Continue')}</button></div>`;
+ document.body.appendChild(d);
+ for(let i=0;i<46;i++){const p=document.createElement('i');p.className='cf';p.style.cssText=`left:${Math.random()*100}vw;background:${['#22e58a','#c6f432','#10b981','#fff','#06b6d4'][i%5]};animation-duration:${1.6+Math.random()*1.8}s;animation-delay:${Math.random()*.5}s`;document.body.appendChild(p);setTimeout(()=>p.remove(),4200)}
+ hap('heavy')}
+function askDelete(){const d=document.createElement('div');d.className='mm';
+ d.innerHTML=`<div class="mmc"><div style="font-size:46px">🗑️</div><h2>${t('Удалить профиль?','Delete profile?')}</h2><p class="mt">${t('Анкета, мэтчи и свайпы будут удалены без возможности восстановления.','Your profile, matches and swipes will be deleted permanently.')}</p><button class="btn" style="background:#ff5d73;color:#fff;box-shadow:0 10px 28px #ff5d7355;margin-bottom:10px" onclick="this.closest('.mm').remove();deleteProfile()">${t('Да, удалить','Yes, delete')}</button><button class="btn alt" onclick="this.closest('.mm').remove()">${t('Отмена','Cancel')}</button></div>`;
+ document.body.appendChild(d)}
+async function deleteProfile(){const r=await api('/api/delete',{});
+ if(API&&!(r&&r.ok)){toast(t('Не удалось удалить. Проверь соединение и попробуй ещё раз','Could not delete. Check your connection and try again'));return}
+ window.__del=1;try{localStorage.clear()}catch(e){}location.reload()}
+function openChat(u){const url='https://t.me/'+u;try{tgw&&tgw.openTelegramLink?tgw.openTelegramLink(url):window.open(url,'_blank')}catch(e){window.open(url,'_blank')}}
+async function checkMatches(){if(window.__del||!API||!S.p.games.length||S.view=='welcome'||S.view=='onb')return;
+ const r=await api('/api/matches',{});const it=(r&&r.items)||[];if(!it.length)return;
+ it.forEach(m=>{S.matches++;showMatch({n:m.n},m.contact,m.username)});save();if(S.view=='profile')R()}
+function askWrite(){try{if(API&&!S.wa&&tgw&&tgw.requestWriteAccess&&tgw.isVersionAtLeast&&tgw.isVersionAtLeast('6.9')){S.wa=1;save();tgw.requestWriteAccess(()=>{})}}catch(e){}}
+function drag(){const c=$('#cd');if(!c)return;let x0=null;const sl=$('#sl'),sn=$('#sn');
+ c.onpointerdown=e=>{x0=e.clientX;c.setPointerCapture(e.pointerId);c.style.transition='none'};
+ c.onpointermove=e=>{if(x0==null)return;const d=e.clientX-x0;c.style.transform=`translateX(${d}px) rotate(${d/22}deg)`;sl.style.opacity=Math.max(0,Math.min(d/90,1));sn.style.opacity=Math.max(0,Math.min(-d/90,1))};
+ c.onpointercancel=()=>{x0=null;c.style.transition='transform .25s';c.style.transform='';sl.style.opacity=0;sn.style.opacity=0};
+ c.onpointerup=e=>{if(x0==null)return;const d=e.clientX-x0;x0=null;c.style.transition='transform .25s';if(d>100)swipe(1);else if(d<-100)swipe(0);else{c.style.transform='';sl.style.opacity=0;sn.style.opacity=0}}}
+
+
+const PH=u=>`background-image:url(${u});background-size:cover;background-position:center;background-repeat:no-repeat`;
+function rolesBox(g){const rs=S.p.roles[g]||[];return `<div class="box"><b style="font-size:16px">${g}</b><div style="margin-top:12px">${G[g].roles.map(r=>`<button class="li ${rs.includes(r[0])?'on':''}" onclick="togR('${g}','${r[0]}')"><span class="ck">${rs.includes(r[0])?'✓':''}</span>${t(r[1],r[2])}</button>`).join('')}</div></div>`}
+function editView(){const p=S.p;
+ return `<div class="sh" style="margin-top:20px"><small>${t('РЕДАКТИРОВАНИЕ','EDITING')}</small><h2>${t('Моя анкета','My profile')}</h2></div>
+ <div class="box" style="display:flex;gap:16px;align-items:center">
+  <div class="sq" style="margin:0;flex:none;${p.photo?PH(p.photo):''}">${p.photo?'':esc((p.nick||'?')[0]).toUpperCase()}</div>
+  <div style="flex:1"><input type="file" accept="image/*" id="fl" onchange="photo(this)" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"><label for="fl" class="btn alt" style="cursor:pointer">${p.photo?t('Сменить фото','Change photo'):t('Загрузить фото','Upload photo')}</label>${p.photo?`<div class="ulink" style="margin-top:12px" onclick="S.p.photo='';save();R()">${t('Убрать фото','Remove photo')}</div>`:''}</div></div>
+ <label class="l">${t('Никнейм','Nickname')}</label><input value="${esc(p.nick)}" maxlength="20" enterkeyhint="next" oninput="S.p.nick=this.value;save();chk()">
+ <label class="l" style="display:flex;justify-content:space-between;align-items:center"><span>${t('Возраст','Age')}</span><span class="tag g" id="ag" style="margin:0;font-size:13px">${p.age} ${t('лет','y.o.')}</span></label><input type="range" min="16" max="40" value="${p.age}" style="--p:${(p.age-16)/24*100}%" oninput="S.p.age=+this.value;this.style.setProperty('--p',(this.value-16)/24*100+'%');$('#ag').textContent=this.value+' '+t('лет','y.o.');save();chk()">
+ <label class="l">${t('Пол','Gender')}</label>${[['m',t('Парень','Guy')],['f',t('Девушка','Girl')]].map(x=>`<button class="li rd ${p.gender==x[0]?'on':''}" onclick="S.p.gender='${x[0]}';save();R()"><span class="ck">${p.gender==x[0]?'●':''}</span>${x[1]}</button>`).join('')}
+ <label class="l">${t('О себе','About')} <span id="cn">${p.about.length}/200</span></label><textarea rows="4" maxlength="200" oninput="S.p.about=this.value;$('#cn').textContent=this.value.length+'/200';save()" placeholder="${t('Прайм-тайм, любимые карты, манера игры...','Prime time, favorite maps, playstyle...')}">${esc(p.about)}</textarea>
+ <label class="l">${t('Цель поиска','Looking for')}</label>${GOALS.map(x=>`<button class="li rd ${p.goal==x[0]?'on':''}" onclick="S.p.goal='${x[0]}';save();R()"><span class="ck">${p.goal==x[0]?'●':''}</span><div>${t(x[1],x[2])}<small>${t(x[3],x[4])}</small></div></button>`).join('')}
+ <label class="l">${t('Игры','Games')}</label>${Object.keys(G).map(g=>`<button class="li ${p.games.includes(g)?'on':''}" onclick="togG('${g}')"><span class="ck">${p.games.includes(g)?'✓':''}</span><b>${g}</b></button>`).join('')}
+ ${p.games.length?`<label class="l">${t('Уровень','Skill')}</label>${p.games.map(skillBox).join('')}<label class="l">${t('Роли (до двух в игре)','Roles (up to two per game)')}</label>${p.games.map(rolesBox).join('')}`:''}
+ <div class="act"><button class="btn alt" onclick="editCancel()">✕</button><button class="btn" id="nx" ${okAll()?'':'disabled'} onclick="editSave()">${t('Сохранить изменения','Save changes')}</button></div>`}
+function editStart(){S.bak=JSON.stringify(S.p);S.view='edit';save();R();scrollTo(0,0)}
+function editCancel(){try{S.p=JSON.parse(S.bak)}catch(e){}delete S.bak;S.view='profile';save();R();scrollTo(0,0)}
+function editSave(){if(!okAll())return toast(t('Заполни ник, уровень и роли для каждой игры','Fill in nickname, level and roles for each game'));
+ delete S.bak;S.view='profile';save();pushProfile();R();scrollTo(0,0);toast(t('Анкета обновлена','Profile updated'))}
+
+function profile(){const p=S.p;
+ return `<div class="banner"></div><div class="sq" style="${p.photo?`background-image:url(${p.photo});background-size:cover;background-position:center;background-repeat:no-repeat`:''}">${p.photo?'':esc((p.nick||'?')[0]).toUpperCase()}</div>
+ <div style="margin:12px 0 0"><h2 style="text-transform:uppercase">${esc(p.nick)}</h2><div style="margin-top:8px"><span class="tag">${p.gender=='m'?'♂':'♀'} ${p.age}</span>${p.games.map(g=>`<span class="tag g">${g}</span>`).join('')}</div></div>
+ <div class="stat"><div><b class="cnt" data-n="${S.swipes}">0</b>${t('Свайпы','Swipes')}</div><div><b class="cnt" data-n="${S.matches}">0</b>${t('Мэтчи','Matches')}</div><div><b class="cnt" data-n="${p.games.length}">0</b>${t('Игры','Games')}</div></div>
+ <div class="box"><table style="margin:0">${p.games.map(g=>`<tr><td>${g}</td><td>${esc(lvl(g,p.skill[g]))}<br><span style="color:var(--mt)">${(p.roles[g]||[]).map(r=>esc(roleName(g,r))).join(' · ')}</span></td></tr>`).join('')}</table></div>
+ <div class="box"><span class="tag on">${t(GOALS.find(x=>x[0]==p.goal)[1],GOALS.find(x=>x[0]==p.goal)[2])}</span>${p.about?`<p class="ab" style="margin:8px 0 0">${esc(p.about)}</p>`:`<p class="ab" style="margin:8px 0 0">${t('Описание не заполнено','No description yet')}</p>`}</div>
+ <button class="btn" style="margin-top:14px" onclick="editStart()">${t('Редактировать анкету','Edit profile')}</button>
+ <button class="btn alt" style="margin-top:12px" onclick="S.view='onb';S.step=1;save();R()">${t('Пройти регистрацию заново','Redo onboarding')}</button>
+ <button class="btn alt" style="margin-top:12px" onclick="askFb()">✉️ ${t('Обратная связь','Feedback')}</button>
+ <div style="margin-top:14px">${adBanner()}</div>
+ <div class="ulink" style="color:#ff6b7d" onclick="askDelete()">${t('Удалить профиль','Delete profile')}</div>`}
+
+function tasks(){const T=[[t('Подпишись на канал','Join our channel'),t('Новости проекта и розыгрыши','Project news and giveaways'),0,1],[t('20 свайпов за день','20 swipes today'),t('Ежедневная активность в ленте','Daily feed activity'),Math.min(S.swipes,20),20],[t('Первый мэтч','First match'),t('Свайпай и получи взаимный лайк','Swipe and get a mutual like'),Math.min(S.matches,1),1]];
+ return `<h2 style="margin:20px 0 4px">${t('Миссии','Missions')}</h2><p class="mt">${t('Выполняй задания и поднимай анкету выше','Complete missions to boost your profile')}</p>`+
+ T.map(x=>`<div class="box"><b>${x[0]}</b><div class="mt" style="margin:4px 0 12px">${x[1]}</div><div class="mis"><div class="pg"><i style="width:${x[2]/x[3]*100}%"></i></div><span>${x[2]}/${x[3]}</span></div></div>`).join('')+`<button class="btn" onclick="go('feed')">${t('К ленте','To feed')} →</button>`}
+
+if(!S.p.games.length&&['feed','profile','tasks'].includes(S.view))S.view='welcome';
+S.view=='feed'?go('feed'):(R(),checkMatches());
+/* Клавиатура: Enter — «Далее» / «Опубликовать» / «Сохранить», Ctrl+Enter — отправить отзыв или перейти из текстового поля, Esc — закрыть окно, ←/→ в ленте */
+document.addEventListener('keydown',e=>{if(e.isComposing||e.altKey)return;
+ const tg=e.target,tag=tg&&tg.tagName,modal=document.querySelector('.mm'),typing=tag=='TEXTAREA'||(tag=='INPUT'&&tg.type!='range');
+ if(e.key=='Escape'){if(modal){modal.remove();e.preventDefault()}return}
+ if(e.key=='Enter'){
+  if(modal){if(document.querySelector('.fbm')&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendFb()}return}
+  if(tag=='BUTTON'||tag=='A'||tag=='LABEL'||(tag=='INPUT'&&tg.type=='file'))return; // на кнопке Enter нажимает её сам
+  if(tag=='TEXTAREA'&&!(e.ctrlKey||e.metaKey))return; // в «О себе» Enter — новая строка
+  if(S.view=='welcome'){e.preventDefault();S.view='onb';S.step=1;save();R();return}
+  if(S.view=='onb'){e.preventDefault();if(ok()){if(tg.blur)tg.blur();nxt()}else toast(t('Заполни обязательные поля','Fill in the required fields'));return}
+  if(S.view=='edit'){e.preventDefault();if(tg.blur)tg.blur();editSave();return}
+ }
+ if(!modal&&!typing&&S.view=='feed'&&Q[qi]){if(e.key=='ArrowRight'){e.preventDefault();swipe(1)}else if(e.key=='ArrowLeft'){e.preventDefault();swipe(0)}}});
+setInterval(checkMatches,20000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkMatches()});
+</script></body></html>
