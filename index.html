@@ -247,6 +247,22 @@ button.tag,button.bd{color:var(--tx)}
 .ad2 .adi{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#22e58a1f;border:1px solid #22e58a44;color:var(--g);margin:0}
 /* цвет значка пола */
 .gm{color:#4da8ff}.gf{color:#ff6fb5}
+/* статус «в сети» на карточке */
+.lsn{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;font-weight:600;color:rgba(255,255,255,.78)}
+.lsn i{width:8px;height:8px;border-radius:50%;background:#9fb3a8;flex:none}
+.lsn.s0{color:#7dffb8}.lsn.s0 i{background:#22e58a;box-shadow:0 0 0 3px #22e58a33,0 0 10px #22e58a;animation:lsp 1.8s ease-in-out infinite}
+.lsn.s1 i{background:#c6f432}
+@keyframes lsp{50%{box-shadow:0 0 0 5px #22e58a1a,0 0 14px #22e58a}}
+/* фильтр ленты по игре */
+.fgr{display:flex;gap:6px;overflow-x:auto;margin:-2px -14px 10px;padding:0 14px;scrollbar-width:none}.fgr::-webkit-scrollbar{display:none}
+.fgr .tag{flex:none;margin:0;padding:6px 12px;font-size:12.5px;cursor:pointer;color:var(--tx);font-family:inherit}
+.fgr .tag.on{background:linear-gradient(135deg,var(--g),var(--lm));color:#05220f;border-color:transparent}
+.fgr .tag.on .gi{color:#05220f}
+/* Discord / Steam */
+.cxi{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:0 0 0 14px;border:1px solid var(--bd);border-radius:14px;background:var(--gl)}
+.cxi>svg{flex:none;color:var(--g)}.cxi input{border:0!important;background:none!important;box-shadow:none!important;margin:0!important;padding-left:0!important;flex:1;min-width:0}
+.mxr{display:flex;gap:8px;margin-bottom:10px}.mxr .btn{flex:1;min-width:0;padding:12px 8px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mxr .btn svg{color:var(--g)}
+.tag.tap{cursor:pointer}
 .trt{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;z-index:2}.trt .lk{position:static}
 .bsb{display:inline-flex;align-items:center;gap:5px;padding:5px 11px 5px 9px;border-radius:999px;background:rgba(4,16,11,.62);border:1px solid #c6f432;color:#c6f432;font:800 12px Manrope,sans-serif;box-shadow:0 0 14px #c6f43266;animation:bsg 2.2s ease-in-out infinite alternate}
 @keyframes bsg{to{box-shadow:0 0 22px #c6f432aa}}
@@ -327,14 +343,15 @@ const MOCK=[
 {n:'Raze',a:23,g:'f',goal:'ranked',about:['Радиант-стремящаяся','Aiming for Radiant'],sk:{'Valorant':{m:'rank',v:7}},rl:{'Valorant':['Duelist']}}];
 
 let Q=[],qi=0;
-const localQ=()=>{const me=S.p;let c=MOCK.filter(m=>Object.keys(m.sk).some(g=>me.games.includes(g)));
+const localQ=()=>{const me=S.p,fg=fgOk();let c=MOCK.filter(m=>Object.keys(m.sk).some(g=>me.games.includes(g)&&(!fg||g==fg)));
  const d=m=>Math.min(...Object.keys(m.sk).filter(g=>me.games.includes(g)).map(g=>Math.abs(score(g,m.sk[g])-score(g,me.skill[g]))));
  if(me.goal=='fun')c.sort(()=>Math.random()-.5);else c.sort((a,b)=>d(a)-d(b)); // фан — без сортировки по скиллу; иначе ±по уровню
+ MOCK.forEach((m,i)=>{if(m.ls==null)m.ls=i%4}); // демо: разный статус «в сети»
  return c};
 let F={err:null,stats:null,again:0};
 async function loadQ(){F.err=null;F.stats=null;qi=0;
  if(API&&!S.synced){const pr=await pushProfile();if(!(pr&&pr.ok)){F.err=!pr?'net':pr.error=='auth'?'auth':pr.error=='bad profile'?'bad':'srv';Q=[];return}}
- const r=await api('/api/feed',{goal:S.p.goal,skill:S.p.skill,roles:S.p.roles,games:S.p.games,again:F.again?1:0});F.again=0;
+ const r=await api('/api/feed',{goal:S.p.goal,skill:S.p.skill,roles:S.p.roles,games:S.p.games,game:fgOk()||undefined,again:F.again?1:0});F.again=0;
  if(!API){Q=localQ();return}
  if(!r)F.err='net';else if(r.error)F.err=r.error=='auth'?'auth':'srv';
  Q=(r&&r.items)||[];F.stats=(r&&r.stats)||null}
@@ -423,6 +440,8 @@ const SV=(p,z=18)=>`<svg viewBox="0 0 24 24" width="${z}" height="${z}" fill="no
 const ROCKET='<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>';
 const IUS='<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>';
 const IMAIL='<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7l8.5 6 8.5-6"/>';
+const IHS='<path d="M4 15v-3a8 8 0 0116 0v3"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.8"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.8"/>';
+const IPAD='<path d="M7 7h10a5 5 0 015 5.4l-.4 3.6a3 3 0 01-5.3 1.6L14.5 16h-5l-1.8 1.6A3 3 0 012.4 16L2 12.4A5 5 0 017 7z"/><path d="M7.5 10.5v3M6 12h3"/><circle cx="16" cy="11.2" r=".6" fill="currentColor"/><circle cx="17.6" cy="13" r=".6" fill="currentColor"/>';
 const ITG='<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>';
 const ILINK='<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>';
 /* Шапка профиля */
@@ -469,7 +488,7 @@ const BDG=[['channel','📢','Подписчик','Subscriber','Подпишис
  ['boost','🚀','Буст','Boosted','Нажми 🚀 вверху приложения и включи буст (3 ⚡)','Tap 🚀 at the top of the app and turn on a boost (3 ⚡)']];
 
 function card(m,live){const gs=Object.keys(m.sk),goal=GOALS.find(x=>x[0]==m.goal),ab=m.about[S.lang=='ru'?0:1]||m.about[0],bn=m.bn||{m:'auto'},gc=BC[bnr({banner:bn}).gl],bds=(m.bd||[]).filter(x=>BDG.some(b=>b[0]==x));
- return `<div class="card hb${gc?' gw':''}" ${live?'id="cd"':''} ${gc?`style="${glowVars(gc[1])}"`:''}><div class="cb">${bannerHtml({banner:bn,games:gs},0,0,1)}</div><div class="ph" style="${m.photo?`background-image:url(${m.photo});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#0b1a14`:''}">${m.photo?'':`<i>${esc((m.n||'?')[0]).toUpperCase()}</i>`}<span class="tag">${t(goal[1],goal[2])}</span>${m.lm||m.bs?`<div class="trt">${m.lm?`<span class="lk">💚 ${t('Лайкнул(а) тебя','Liked you')}</span>`:''}${m.bs?`<span class="bsb">${SV(ROCKET,14)}${t('Буст','Boost')}</span>`:''}</div>`:''}${live?`<span class="stamp l" id="sl">${IH} ${t('Го играть','Let’s play')}</span><span class="stamp n" id="sn">${IX} ${t('Мимо','Pass')}</span>`:''}<div class="ov"><div class="ovr"><b class="nm">${esc(m.n)||'—'}</b><span class="ag">${gnd(m.g)}${m.a}</span></div>${bds.length?`<div class="bdr" onclick="showBadges('${bds.join(',')}')">${bds.map(id=>`<span class="bdc">${BDG.find(b=>b[0]==id)[1]}</span>`).join('')}</div>`:''}</div></div>
+ return `<div class="card hb${gc?' gw':''}" ${live?'id="cd"':''} ${gc?`style="${glowVars(gc[1])}"`:''}><div class="cb">${bannerHtml({banner:bn,games:gs},0,0,1)}</div><div class="ph" style="${m.photo?`background-image:url(${m.photo});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#0b1a14`:''}">${m.photo?'':`<i>${esc((m.n||'?')[0]).toUpperCase()}</i>`}<span class="tag">${t(goal[1],goal[2])}</span>${m.lm||m.bs?`<div class="trt">${m.lm?`<span class="lk">💚 ${t('Лайкнул(а) тебя','Liked you')}</span>`:''}${m.bs?`<span class="bsb">${SV(ROCKET,14)}${t('Буст','Boost')}</span>`:''}</div>`:''}${live?`<span class="stamp l" id="sl">${IH} ${t('Го играть','Let’s play')}</span><span class="stamp n" id="sn">${IX} ${t('Мимо','Pass')}</span>`:''}<div class="ov"><div class="ovr"><b class="nm">${esc(m.n)||'—'}</b><span class="ag">${gnd(m.g)}${m.a}</span></div>${m.ls<3?`<div class="lsn s${m.ls}"><i></i>${[t('В сети','Online'),t('Был(а) сегодня','Active today'),t('Был(а) недавно','Active recently')][m.ls]}</div>`:''}${bds.length?`<div class="bdr" onclick="showBadges('${bds.join(',')}')">${bds.map(id=>`<span class="bdc">${BDG.find(b=>b[0]==id)[1]}</span>`).join('')}</div>`:''}</div></div>
  <div class="in">${gs.map(g=>`<div class="gr2">${gI(g,28)}<b>${g}</b>${rk(g,m.sk[g])}<span class="rl2">${(m.rl[g]||[]).map(r=>esc(roleName(g,r))).join(', ')}</span></div>`).join('')}${ab?`<p class="ab">${esc(ab)}</p>`:''}</div></div>`}
 
 const adBanner=()=>`<button class="ad" onclick="askFb('${t('Реклама: ','Advertising: ')}')"><i>${t('Реклама','Ad')}</i><span><b>${t('Тут вы можете разместить свою рекламу','Your ad could be here')}</b><small>${t('Нажми, чтобы написать нам','Tap to contact us')}</small></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>`;
@@ -503,10 +522,17 @@ function boostHtml(){if(!M)return `<div class="mmc"><p class="mt">${t('Загр�
  <div class="tkr"><span class="mt">${t('У тебя','You have')}</span> <b>⚡ ${tk}</b> <span class="mt">/ ${c}</span><div class="pg"><i style="width:${pc}%"></i></div></div>${act}<button class="btn alt" onclick="this.closest('.mm').remove()">${t('Закрыть','Close')}</button></div>`}
 function boostSheet(){let d=document.querySelector('.bsm');if(!d){d=document.createElement('div');d.className='mm bsm';document.body.appendChild(d)}
  d.innerHTML=boostHtml();if(!M)loadM().then(updBoost)}
+/* Пока рекламодателей нет — в блоке зовём на канал (миссия «подписка», +1 ⚡). После подписки — обычное «здесь может быть реклама» */
+const chTile=()=>`<button class="ad2" onclick="openChannel();go('tasks')"><span class="adi">${SV(ITG,19)}</span><span><i>${t('Наш канал','Our channel')}</i><b>${t('Подпишись и получи +1 ⚡','Join and get +1 ⚡')}</b></span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>`;
+const adSlot=()=>{const ch=M&&M.items&&M.items.find(x=>x.key=='channel');return ch&&!ch.done&&(M.channel||CH)?chTile():adTile()};
+const fgOk=()=>S.fg&&S.p.games.includes(S.fg)?S.fg:'';
+const setFG=g=>{if(fgOk()==g)return;S.fg=g;save();go('feed')};
+const fgRow=()=>S.p.games.length>1?`<div class="fgr"><button class="tag pick ${fgOk()?'':'on'}" onclick="setFG('')">${t('Все игры','All games')}</button>${S.p.games.map(g=>`<button class="tag pick ${fgOk()==g?'on':''}" onclick="setFG('${g}')">${gI(g)}${g}</button>`).join('')}</div>`:'';
 const adTile=()=>`<button class="ad2" onclick="askFb('${t('Реклама: ','Advertising: ')}')"><span class="adi"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin:0"><path d="M4 10v4a1 1 0 001 1h2l5 4V5L7 9H5a1 1 0 00-1 1zM16 9a4 4 0 010 6M18.5 6.5a7.5 7.5 0 010 11"/></svg></span><span><i>${t('Реклама','Ad')}</i><b>${t('Здесь может быть ваша реклама','Your ad could be here')}</b></span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>`;
-function updBoost(){updHB();const m=document.querySelector('.bsm');if(m)m.innerHTML=boostHtml();if(S.view=='feed')fitCard()}
+function updBoost(){updHB();const m=document.querySelector('.bsm');if(m)m.innerHTML=boostHtml();
+ if(S.view=='feed'){const a=$('#adw');if(a)a.innerHTML=adSlot();fitCard()}}
 function feed(){const m=Q[qi];
- return `<div class="frow one">${adTile()}</div>`+
+ return `<div class="frow one" id="adw">${adSlot()}</div>${fgRow()}`+
  (m?card(m,1)+`<div class="two"><button class="btn alt" onclick="fly(0)">${IX} ${t('Мимо','Pass')}</button><button class="btn" onclick="fly(1)">${IH} ${t('Го играть','Let’s play')}</button></div><div class="ulink" onclick="qi=Math.max(0,qi-1);R()">↩ ${t('Вернуть прошлую анкету','Undo last')}</div>`
   :emptyBox())}
 function emptyBox(){const st=F.stats;let e='🛰️',h=t('Пока пусто','Nothing yet'),p=t('Подходящие игроки закончились. Загляни позже!','No more matching players. Check back later!'),b='';
@@ -523,9 +549,12 @@ function emptyBox(){const st=F.stats;let e='🛰️',h=t('Пока пусто','
  if(!F.err)b+=`<button class="btn alt" style="margin-top:12px" onclick="inviteChoice()">${SV(IUS)} ${t('Пригласить друга','Invite a friend')}</button>`;
  return `<div class="box empty"><div style="font-size:44px">${e}</div><h2 style="margin-top:8px">${h}</h2><p class="mt" style="margin-bottom:0">${p}</p>${b}</div>`}
 function swipe(like){const m=Q[qi];if(!m)return;S.swipes++;qi++;save();R();hap(like?'medium':'light');
- api('/api/swipe',{to:m.id,like:!!like}).then(r=>{const hit=API?!!(r&&r.match):(like&&Math.random()<.3);if(hit){S.matches++;save();showMatch(m,r&&r.contact,r&&r.username)}})}
-function showMatch(m,c,u){const d=document.createElement('div');d.className='mm';
- d.innerHTML=`<div class="mmc"><div style="font-size:54px">💚</div><h2>${t('Это мэтч!','It’s a match!')}</h2><p class="mt">${t('Вы с ','You and ')}<b>${esc(m.n)}</b>${t(' хотите играть вместе',' want to play together')}</p>${u?`<button class="btn" style="margin-bottom:10px" onclick="openChat('${esc(u)}')">${t('Написать','Message')} ${esc(c||'')}</button>`:`<p class="mt">${t('Контакт мы отправили тебе в чат с ботом','We sent the contact to your chat with the bot')}</p>`}<button class="btn alt" onclick="this.closest('.mm').remove()">${t('Продолжить','Continue')}</button></div>`;
+ api('/api/swipe',{to:m.id,like:!!like}).then(r=>{const hit=API?!!(r&&r.match):(like&&Math.random()<.3);if(hit){S.matches++;save();showMatch(m,r&&r.contact,r&&r.username,API?r:{dc:'demo_player',st:'https://steamcommunity.com/id/demo'})}})}
+/* Discord/Steam: видны только после мэтча. Значения проверены сервером (латиница, цифры, _ . - #) */
+const okDc=s=>/^[A-Za-z0-9_.]{2,32}(#\d{4})?$/.test(s),okSt=s=>/^(https?:\/\/)?(www\.)?steamcommunity\.com\/(id|profiles)\/[A-Za-z0-9_-]{2,64}\/?$/.test(s)||/^[A-Za-z0-9_-]{2,64}$/.test(s);
+function showMatch(m,c,u,x){const d=document.createElement('div');d.className='mm';x=x||{};
+ const dc=x.dc&&okDc(x.dc)?x.dc:'',st=x.st&&/^https:\/\/steamcommunity\.com\/(id|profiles)\/[A-Za-z0-9_-]+$/.test(x.st)?x.st:'';
+ d.innerHTML=`<div class="mmc"><div style="font-size:54px">💚</div><h2>${t('Это мэтч!','It’s a match!')}</h2><p class="mt">${t('Вы с ','You and ')}<b>${esc(m.n)}</b>${t(' хотите играть вместе',' want to play together')}</p>${u?`<button class="btn" style="margin-bottom:10px" onclick="openChat('${esc(u)}')">${t('Написать','Message')} ${esc(c||'')}</button>`:`<p class="mt">${t('Контакт мы отправили тебе в чат с ботом','We sent the contact to your chat with the bot')}</p>`}${dc||st?`<div class="mxr">${dc?`<button class="btn alt" onclick="copyDc('${dc}')">${SV(IHS,17)} ${esc(dc)}</button>`:''}${st?`<button class="btn alt" onclick="openExt('${st}')">${SV(IPAD,17)} Steam</button>`:''}</div>`:''}<button class="btn alt" onclick="this.closest('.mm').remove()">${t('Продолжить','Continue')}</button></div>`;
  document.body.appendChild(d);
  for(let i=0;i<46;i++){const p=document.createElement('i');p.className='cf';p.style.cssText=`left:${Math.random()*100}vw;background:${['#22e58a','#c6f432','#10b981','#fff','#06b6d4'][i%5]};animation-duration:${1.6+Math.random()*1.8}s;animation-delay:${Math.random()*.5}s`;document.body.appendChild(p);setTimeout(()=>p.remove(),4200)}
  hap('heavy')}
@@ -538,7 +567,7 @@ async function deleteProfile(){const r=await api('/api/delete',{});
 function openChat(u){const url='https://t.me/'+u;try{tgw&&tgw.openTelegramLink?tgw.openTelegramLink(url):window.open(url,'_blank')}catch(e){window.open(url,'_blank')}}
 async function checkMatches(){if(window.__del||!API||!S.p.games.length||S.view=='welcome'||S.view=='onb')return;
  const r=await api('/api/matches',{});const it=(r&&r.items)||[];if(!it.length)return;
- it.forEach(m=>{S.matches++;showMatch({n:m.n},m.contact,m.username)});save();if(S.view=='profile')R()}
+ it.forEach(m=>{S.matches++;showMatch({n:m.n},m.contact,m.username,m)});save();if(S.view=='profile')R()}
 function askWrite(){try{if(API&&!S.wa&&tgw&&tgw.requestWriteAccess&&tgw.isVersionAtLeast&&tgw.isVersionAtLeast('6.9')){S.wa=1;save();tgw.requestWriteAccess(()=>{})}}catch(e){}}
 /* Карточка целиком в окне: фото сжимается по высоте, чтобы игры и описание были видны без прокрутки */
 function fitCard(){const c=$('#cd'),ph=c&&c.querySelector('.ph');if(!ph)return;
@@ -601,7 +630,10 @@ function aboutBody(p){return `<label class="l">${t('Никнейм','Nickname')}
  <label class="l" style="display:flex;justify-content:space-between;align-items:center"><span>${t('Возраст','Age')}</span><span class="tag g" id="ag" style="margin:0;font-size:13px">${p.age} ${t('лет','y.o.')}</span></label><input type="range" min="16" max="40" value="${p.age}" style="--p:${(p.age-16)/24*100}%" oninput="S.p.age=+this.value;this.style.setProperty('--p',(this.value-16)/24*100+'%');$('#ag').textContent=this.value+' '+t('лет','y.o.');save();chk()">
  <label class="l">${t('Пол','Gender')}</label>${genderBtns(p)}
  <label class="l">${t('Цель поиска','Looking for')}</label>${GOALS.map(x=>`<button class="li rd ${p.goal==x[0]?'on':''}" onclick="S.p.goal='${x[0]}';save();R()"><span class="ck">${p.goal==x[0]?'●':''}</span><div>${t(x[1],x[2])}<small>${t(x[3],x[4])}</small></div></button>`).join('')}
- <label class="l">${t('О себе','About')} <span id="cn">${p.about.length}/200</span></label><textarea rows="4" maxlength="200" oninput="S.p.about=this.value;$('#cn').textContent=this.value.length+'/200';save()" placeholder="${t('Прайм-тайм, любимые карты, манера игры...','Prime time, favorite maps, playstyle...')}">${esc(p.about)}</textarea>`}
+ <label class="l">${t('О себе','About')} <span id="cn">${p.about.length}/200</span></label><textarea rows="4" maxlength="200" oninput="S.p.about=this.value;$('#cn').textContent=this.value.length+'/200';save()" placeholder="${t('Прайм-тайм, любимые карты, манера игры...','Prime time, favorite maps, playstyle...')}">${esc(p.about)}</textarea>
+ <label class="l">${t('Где играем вместе','Where to team up')}</label><p class="hint" style="margin:-2px 0 8px">${t('Необязательно. Увидит только тот, с кем будет мэтч.','Optional. Only your matches will see it.')}</p>
+ <div class="cxi">${SV(IHS,18)}<input value="${esc(p.dc||'')}" maxlength="40" placeholder="${t('Ник в Discord','Discord username')}" autocapitalize="off" autocomplete="off" enterkeyhint="done" oninput="S.p.dc=this.value.trim();save()"></div>
+ <div class="cxi">${SV(IPAD,18)}<input value="${esc(p.st||'')}" maxlength="120" placeholder="${t('Steam: ссылка на профиль или ID','Steam: profile link or ID')}" autocapitalize="off" autocomplete="off" enterkeyhint="done" oninput="S.p.st=this.value.trim();save()"></div>`}
 function gamesBody(p){return `<p class="mt" style="margin:8px 0 12px">${t('Выбери игры. Для каждой нужны уровень и роль.','Pick your games. Each one needs a level and a role.')}</p>`+Object.keys(G).map(g=>`<button class="li ${p.games.includes(g)?'on':''}" onclick="togG('${g}')"><span class="ck">${p.games.includes(g)?'✓':''}</span>${gI(g,30)}<b>${g}</b></button>`).join('')+p.games.filter(g=>SH.fill.includes(g)).map(g=>skillBox(g)+rolesBox(g)).join('')}
 function sheetBody(){const p=S.p,k=SH.k;
  if(k=='banner'||k=='visual')return bannerBody(p);if(k=='avatar')return avatarBody(p);if(k=='about')return aboutBody(p);if(k=='games')return gamesBody(p);
@@ -617,6 +649,9 @@ function closeSheet(keep){const e=$('#shm');e&&e.remove();
  if(!keep&&SH.k&&SH.bak){try{S.p=JSON.parse(SH.bak);save()}catch(x){}}
  const had=SH.k;SH.k=null;SH.bak='';SH.fill=[];if(!keep&&had)R()}
 function saveSheet(){if(!SH.k)return;if(!okAll())return toast(t('Заполни ник, уровень и роли для каждой игры','Fill in nickname, level and roles for each game'));
+ if(S.p.dc&&!okDc(S.p.dc.replace(/^@/,'')))return toast(t('Ник Discord: только латиница, цифры, точка и _','Discord name: only latin letters, digits, dot and _'));
+ if(S.p.st&&!okSt(S.p.st))return toast(t('Steam: вставь ссылку на профиль или ID','Steam: paste your profile link or ID'));
+ if(S.p.dc)S.p.dc=S.p.dc.replace(/^@/,'');
  closeSheet(1);save();pushProfile();R();toast(t('Сохранено','Saved'))}
 
 function profile(){const p=S.p;
@@ -624,8 +659,7 @@ function profile(){const p=S.p;
  const bd=(M&&M.badges)||[],goal=GOALS.find(x=>x[0]==p.goal)||GOALS[0];
  return `${hero(p,1)}
  <div class="nmr" style="margin:12px 0 0"><h2 style="text-transform:uppercase;min-width:0;overflow-wrap:anywhere">${esc(p.nick)}</h2><button class="pen" onclick="openSheet('about')" aria-label="edit">${PEN}</button></div>
- <div class="tags" style="margin-top:8px"><span class="tag">${gnd(p.gender)}${p.age}</span>${p.games.map(g=>`<span class="tag g">${gI(g)}${g}</span>`).join('')}</div>
- <div class="stat"><div><b class="cnt" data-n="${S.swipes}">0</b>${t('Свайпы','Swipes')}</div><div><b class="cnt" data-n="${S.matches}">0</b>${t('Мэтчи','Matches')}</div><div><b class="cnt" data-n="${p.games.length}">0</b>${t('Игры','Games')}</div></div>
+ <div class="tags" style="margin-top:8px;margin-bottom:14px"><span class="tag">${gnd(p.gender)}${p.age}</span>${p.games.map(g=>`<span class="tag g">${gI(g)}${g}</span>`).join('')}${p.dc?`<span class="tag tap" onclick="openSheet('about')">${SV(IHS,14)}${esc(p.dc)}</span>`:''}${p.st?`<span class="tag tap" onclick="openSheet('about')">${SV(IPAD,14)}Steam</span>`:''}</div>
  <div class="box" style="padding-top:10px;padding-bottom:6px"><div class="nmr" style="padding-bottom:6px"><b>${t('Игры','Games')}</b><button class="pen" onclick="openSheet('games')" aria-label="edit games">${PEN}</button></div>${p.games.map(g=>`<button class="gl tap" onclick="openSheet('g:${g}')">${gI(g)}<div class="gx"><div class="gh"><b>${g}</b>${rk(g,p.skill[g])}</div><div class="gs">${(p.roles[g]||[]).map(r=>esc(roleName(g,r))).join(' · ')}</div></div><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>`).join('')}</div>
  <div class="box" style="cursor:pointer" onclick="openSheet('about')"><span class="tag on">${t(goal[1],goal[2])}</span>${p.about?`<p class="ab" style="margin:8px 0 0">${esc(p.about)}</p>`:`<p class="ab" style="margin:8px 0 0">${t('Описание не заполнено','No description yet')}</p>`}</div>
  <div class="box"><b>${t('Значки','Badges')}</b><span class="rw" style="margin-left:8px">${bd.length}/${BDG.length}</span>
@@ -704,9 +738,12 @@ function inviteChoice(){const d=document.createElement('div');d.className='mm';
 async function inviteLink(){if(!M||!M.invite_link)await loadM();return(M&&M.invite_link)||'https://t.me/'+BOT_FALLBACK}
 async function inviteFriend(){const l=await inviteLink();
  openTg('https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent(t('Го в SquadFinder — найди тиммейтов под свой уровень 🎮','Join SquadFinder — find teammates at your level 🎮')))}
-async function copyInvite(){const l=await inviteLink();let ok=false;
+async function copyTxt(l){let ok=false;
  try{await navigator.clipboard.writeText(l);ok=true}catch(e){try{const a=document.createElement('textarea');a.value=l;a.style.cssText='position:fixed;opacity:0;top:0';document.body.appendChild(a);a.focus();a.select();ok=document.execCommand('copy');a.remove()}catch(e2){}}
- toast(ok?t('Ссылка скопирована','Link copied'):l)}
+ return ok}
+async function copyInvite(){const l=await inviteLink();toast(await copyTxt(l)?t('Ссылка скопирована','Link copied'):l)}
+async function copyDc(n){toast(await copyTxt(n)?t('Ник Discord скопирован','Discord name copied'):n)}
+const openExt=u=>{try{tgw&&tgw.openLink?tgw.openLink(u):window.open(u,'_blank')}catch(e){window.open(u,'_blank')}};
 
 if(!S.p.games.length&&['feed','profile','tasks'].includes(S.view))S.view='welcome';
 function start(){S.view=='feed'||S.view=='tasks'?go(S.view):(R(),checkMatches())}
