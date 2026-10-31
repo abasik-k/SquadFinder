@@ -315,6 +315,7 @@ const API=(()=>{if(API_FIXED)return API_FIXED.replace(/\/$/,'');
  return ''})(); // пусто = демо-режим без сервера
 let S;try{S=JSON.parse(localStorage.su2)}catch(e){}
 S=S||{lang:(()=>{try{const l=new URLSearchParams(location.search).get('lang');if(l=='ru'||l=='en')return l}catch(e){}return 'ru'})(),view:'welcome',step:1,swipes:0,matches:0,p:{nick:'',age:18,gender:'m',games:[],skill:{},roles:{},goal:'fun',about:'',photo:'',banner:{c:0,fx:'none',img:''},looking:1}};
+if(S.p&&(S.p.goal=='tour'||S.p.goal=='team'))S.p.goal='ranked'; // старые цели → рейтинговая игра
 const save=()=>{if(window.__del)return;try{localStorage.su2=JSON.stringify(S)}catch(e){}};
 const t=(r,e)=>S.lang=='ru'?r:e,esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sysLight=()=>{try{return matchMedia('(prefers-color-scheme: light)').matches}catch(e){return false}};
@@ -352,7 +353,9 @@ const G={
 'Valorant':{modes:['rank'],r:['Iron','Bronze','Silver','Gold','Platinum','Diamond','Ascendant','Immortal','Radiant'],roles:[['Duelist','Дуэлянт','Duelist'],['Initiator','Инициатор','Initiator'],['Controller','Контроллер','Controller'],['Sentinel','Страж','Sentinel']]},
 'Fortnite':{modes:['rank'],r:['Bronze','Silver','Gold','Platinum','Diamond','Elite','Champion','Unreal'],roles:[['IGL','Шотколлер','Shotcaller'],['Fragger','Фраггер','Fragger'],['Support','Саппорт','Support'],['Builder','Билдер','Builder'],['Flex','Скаут / универсал','Scout / flex']]},
 'Deadlock':{modes:['rank'],r:['Initiate','Seeker','Acolyte','Sentinel','Mystic','Ritualist','Emissary','Oracle','Phantom','Ascendant','Eternus'],roles:[['P1','1 · Главный кэрри','1 · Main carry'],['P2','2 · Мид-кэрри','2 · Mid carry'],['P3','3 · Инициатор / Танк','3 · Initiator / Tank'],['P4','4 · Полусаппорт / Роумер','4 · Semi-support / Roamer'],['P5','5 · Саппорт команды','5 · Team support'],['P6','6 · Полный саппорт','6 · Full support']]}};
-const GOALS=[['fun','Просто для фана','Just for fun','Без привязки к скиллу','No skill matching'],['ranked','Ранкед-стак','Ranked stack','Подбор по твоему уровню','Matched to your level'],['tour','Турниры','Tournaments','Подбор по твоему уровню','Matched to your level'],['team','Постоянная команда','Full team','Подбор по твоему уровню','Matched to your level']];
+const GOALS=[['fun','Для фана','Just for fun','Любой уровень','Any skill'],['ranked','Рейтинг','Ranked','На рейтинг по уровню','Ranked, by your level']];
+/* раньше были ещё «Турниры» и «Постоянная команда» — теперь это рейтинговая игра */
+const goalOf=g=>GOALS.some(x=>x[0]==g)?g:'ranked';
 
 const ranksOf=(g,m)=>m=='comp'?MODES.comp.r:G[g].r,isNum=m=>!!(m&&MODES[m].num);
 const valid=(g)=>{const s=S.p.skill[g];return s&&s.m&&(isNum(s.m)?s.v>0:s.v>=0)};
@@ -364,9 +367,9 @@ const roleName=(g,id)=>{const r=G[g].roles.find(x=>x[0]==id);return r?t(r[1],r[2
 const MOCK=[
 {n:'Zaryad',bd:['channel','swipes','match'],a:19,g:'m',goal:'ranked',about:['Ищу катки по вечерам','Looking for evening games'],sk:{'CS2':{m:'faceit',v:1650},'Valorant':{m:'rank',v:3}},rl:{'CS2':['Entry'],'Valorant':['Duelist']}},
 {n:'Mira',bd:['profile','boost'],bs:1,a:20,g:'f',goal:'fun',about:['Играю для души, без токсиков','Chill games, no toxicity'],sk:{'Valorant':{m:'rank',v:2},'Fortnite':{m:'rank',v:3}},rl:{'Valorant':['Controller'],'Fortnite':['Support']}},
-{n:'Nord',a:22,g:'m',goal:'tour',about:['Нужна команда на турниры','Need a team for tournaments'],sk:{'Dota 2':{m:'mmr',v:5200}},rl:{'Dota 2':['3']}},
+{n:'Nord',a:22,g:'m',goal:'ranked',about:['Нужна команда на турниры','Need a team for tournaments'],sk:{'Dota 2':{m:'mmr',v:5200}},rl:{'Dota 2':['3']}},
 {n:'Kiro',a:17,g:'m',goal:'fun',about:['Дота и расслабон','Dota and relax'],sk:{'Dota 2':{m:'mmr',v:2100},'Deadlock':{m:'rank',v:2}},rl:{'Dota 2':['5'],'Deadlock':['P5']}},
-{n:'Vexa',bd:['channel','invite','match','boost'],a:21,g:'f',goal:'team',about:['IGL, собираю состав','IGL building a roster'],sk:{'CS2':{m:'premier',v:18500},'Valorant':{m:'rank',v:5}},rl:{'CS2':['IGL'],'Valorant':['Initiator']}},
+{n:'Vexa',bd:['channel','invite','match','boost'],a:21,g:'f',goal:'ranked',about:['IGL, собираю состав','IGL building a roster'],sk:{'CS2':{m:'premier',v:18500},'Valorant':{m:'rank',v:5}},rl:{'CS2':['IGL'],'Valorant':['Initiator']}},
 {n:'Bolt',a:18,g:'m',goal:'ranked',about:['Деадлок, вечером онлайн','Deadlock, online evenings'],sk:{'Deadlock':{m:'rank',v:6}},rl:{'Deadlock':['P1']}},
 {n:'Sky',a:24,g:'m',goal:'fun',about:['Фортнайт с друзьями','Fortnite with friends'],sk:{'Fortnite':{m:'rank',v:5},'CS2':{m:'comp',v:1}},rl:{'Fortnite':['Fragger'],'CS2':['Rifler']}},
 {n:'Raze',a:23,g:'f',goal:'ranked',about:['Радиант-стремящаяся','Aiming for Radiant'],sk:{'Valorant':{m:'rank',v:7}},rl:{'Valorant':['Duelist']}}];
@@ -423,7 +426,7 @@ function onb(){const p=S.p,s=S.step;let b='';
  if(s==4)b=`<p class="mt">${t('До двух ролей в каждой игре','Up to two roles per game')}</p>`+p.games.map(g=>rolesBox(g)).join('');
  if(s==5)b=`<label class="l" style="margin-top:4px">${t('Цель поиска','Looking for')}</label>${goalOpts(p)}
  <label class="l">${t('Как связаться','How to team up')}</label>${discBlock(p)}
- <input type="file" accept="image/*" id="fl" onchange="photo(this)" style="position:absolute;left:0;width:1px;height:1px;opacity:0;pointer-events:none"><div class="r2" style="margin-top:12px"><label for="fl" class="btn alt" style="cursor:pointer">📷 ${p.photo?t('Заменить фото','Change photo'):t('Фото','Photo')}</label><button class="btn alt" onclick="preview()">👁 ${t('Как увидят','Preview')}</button></div>
+ <input type="file" accept="image/*" id="fl" onchange="photo(this)" style="position:absolute;left:0;width:1px;height:1px;opacity:0;pointer-events:none"><label class="l">${t('Оформление','Look')}</label><div class="r2" style="margin-top:0"><label for="fl" class="btn alt" style="cursor:pointer">📷 ${p.photo?t('Заменить фото','Change photo'):t('Фото','Photo')}</label><button class="btn alt" onclick="preview()">👁 ${t('Как увидят','Preview')}</button></div>
  <label class="l">${t('О себе','About')} <span id="cn">${p.about.length}/200</span></label><textarea rows="2" maxlength="200" oninput="S.p.about=this.value;$('#cn').textContent=this.value.length+'/200';save()" placeholder="${t('Прайм-тайм, любимые карты, манера игры...','Prime time, favorite maps, playstyle...')}">${esc(p.about)}</textarea>`;
  return `<div class="prog"><i style="width:${s*20}%"></i></div><div class="sh"><small>${t('ЭТАП','STEP')} ${s}/5</small><h2>${t(STEPS[s-1][0],STEPS[s-1][1])}</h2></div>${b}
  <div class="act">${s>1?`<button class="btn alt" onclick="S.step--;R();scrollTo(0,0)">←</button>`:`<button class="btn alt" onclick="S.view='welcome';R()">✕</button>`}<button class="btn" id="nx" ${ok()?'':'disabled'} onclick="nxt()">${s<5?t('Далее','Next')+' →':t('Опубликовать','Publish')}</button></div>`}
@@ -517,7 +520,7 @@ const BDG=[['channel','📢','Подписчик','Subscriber','Подпишис
  ['invite','👥','Душа сквада','Squad builder','Пригласи друга по своей ссылке — он должен создать анкету','Invite a friend via your link — they must create a profile'],
  ['boost','🚀','Буст','Boosted','Нажми 🚀 вверху приложения и включи буст (3 ⚡)','Tap 🚀 at the top of the app and turn on a boost (3 ⚡)']];
 
-function card(m,live){const gs=Object.keys(m.sk),goal=GOALS.find(x=>x[0]==m.goal),ab=m.about[S.lang=='ru'?0:1]||m.about[0],bn=m.bn||{m:'auto'},gc=BC[bnr({banner:bn}).gl],bds=(m.bd||[]).filter(x=>BDG.some(b=>b[0]==x));
+function card(m,live){const gs=Object.keys(m.sk),goal=GOALS.find(x=>x[0]==goalOf(m.goal)),ab=m.about[S.lang=='ru'?0:1]||m.about[0],bn=m.bn||{m:'auto'},gc=BC[bnr({banner:bn}).gl],bds=(m.bd||[]).filter(x=>BDG.some(b=>b[0]==x));
  return `<div class="card hb${gc?' gw':''}" ${live?'id="cd"':''} ${gc?`style="${glowVars(gc[1])}"`:''}><div class="cb">${bannerHtml({banner:bn,games:gs},0,0,1)}</div><div class="ph" style="${m.photo?`background-image:url(${m.photo});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#0b1a14`:''}">${m.photo?'':`<i>${esc((m.n||'?')[0]).toUpperCase()}</i>`}<span class="tag">${t(goal[1],goal[2])}</span>${m.lm||m.bs?`<div class="trt">${m.lm?`<span class="lk">💚 ${t('Лайкнул(а) тебя','Liked you')}</span>`:''}${m.bs?`<span class="bsb">${SV(ROCKET,14)}${t('Буст','Boost')}</span>`:''}</div>`:''}${live?`<span class="stamp l" id="sl">${IH} ${t('Го играть','Let’s play')}</span><span class="stamp n" id="sn">${IX} ${t('Мимо','Pass')}</span>`:''}<div class="ov"><div class="ovr"><b class="nm">${esc(m.n)||'—'}</b><span class="ag">${gnd(m.g)}${m.a}</span></div>${m.ls<3||m.vc?`<div class="ovs">${m.ls<3?`<span class="lsn s${m.ls}"><i></i>${[t('В сети','Online'),t('Был(а) сегодня','Active today'),t('Был(а) недавно','Active recently')][m.ls]}</span>`:''}${m.vc?`<span class="vcb">${SV(IHS,13)}Discord</span>`:''}</div>`:''}${bds.length?`<div class="bdr" onclick="showBadges('${bds.join(',')}')">${bds.map(id=>`<span class="bdc">${BDG.find(b=>b[0]==id)[1]}</span>`).join('')}</div>`:''}</div></div>
  <div class="in">${gs.map(g=>`<div class="gr2">${gI(g,28)}<b>${g}</b>${rk(g,m.sk[g])}<span class="rl2">${(m.rl[g]||[]).map(r=>esc(roleName(g,r))).join(', ')}</span></div>`).join('')}${ab?`<p class="ab">${esc(ab)}</p>`:''}</div></div>`}
 
@@ -638,7 +641,7 @@ function rolesBox(g){const rs=S.p.roles[g]||[];return `<div class="box cb2"><div
 const SH={k:null,bak:'',fill:[]};
 const genderBtns=p=>`<div class="opts">${[['m',t('Парень','Guy')],['f',t('Девушка','Girl')]].map(x=>`<button class="opt ${p.gender==x[0]?'on':''}" onclick="S.p.gender='${x[0]}';save();R()">${gnd(x[0])}${x[1]}</button>`).join('')}</div>`;
 /* Компактные блоки выбора (меньше прокрутки): цель 2×2, игры плитками, роли и способы уровня — чипами */
-const goalOpts=p=>`<div class="opts">${GOALS.map(x=>`<button class="opt col ${p.goal==x[0]?'on':''}" onclick="S.p.goal='${x[0]}';save();R()">${t(x[1],x[2])}<small>${x[0]=='fun'?t('Любой уровень','Any skill'):t('По твоему уровню','By your level')}</small></button>`).join('')}</div>`;
+const goalOpts=p=>`<div class="opts">${GOALS.map(x=>`<button class="opt col ${p.goal==x[0]?'on':''}" onclick="S.p.goal='${x[0]}';save();R()">${t(x[1],x[2])}<small>${t(x[3],x[4])}</small></button>`).join('')}</div>`;
 const gameOpts=p=>`<div class="opts">${Object.keys(G).map(g=>`<button class="opt gm2 ${p.games.includes(g)?'on':''}" onclick="togG('${g}')">${gI(g,26)}<b>${g}</b></button>`).join('')}</div>`;
 /* Discord: «есть Discord» (видят все, без ника) + ник по желанию (виден только после мэтча) */
 const discBlock=p=>`<div class="opts"><button class="opt ${p.vc?'on':''}" onclick="S.p.vc=1;save();R()">${SV(IHS,17)}${t('Есть Discord','I use Discord')}</button><button class="opt ${p.vc?'':'on'}" onclick="S.p.vc=0;S.p.dc='';save();R()">${SV(ITG,16)}${t('Только Telegram','Telegram only')}</button></div>
@@ -694,7 +697,7 @@ function saveSheet(){if(!SH.k)return;if(!okAll())return toast(t('Заполни 
 
 function profile(){const p=S.p;
  if(!M&&!Merr&&!profile.ld){profile.ld=1;loadM().then(()=>{profile.ld=0;if(S.view=='profile')R()})}
- const bd=(M&&M.badges)||[],goal=GOALS.find(x=>x[0]==p.goal)||GOALS[0];
+ const bd=(M&&M.badges)||[],goal=GOALS.find(x=>x[0]==goalOf(p.goal));
  const bdh=`<div class="hbd" onclick="badgeGuide()">${bd.length?bd.map(id=>`<span class="bdc">${(BDG.find(b=>b[0]==id)||[])[1]||''}</span>`).join('')+`<span class="hbn">${bd.length}/${BDG.length}</span>`:`<span class="hbe">🏅 ${t('Получи значки','Earn badges')}</span>`}</div>`;
  return `<div class="hero">${bannerHtml(p,1)}${avatar(p,1)}${bdh}</div>
  <div class="nmr" style="margin:12px 0 0"><h2 style="text-transform:uppercase;min-width:0;overflow-wrap:anywhere">${esc(p.nick)}</h2><button class="pen" onclick="openSheet('about')" aria-label="edit">${PEN}</button></div>
