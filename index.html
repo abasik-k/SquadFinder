@@ -422,7 +422,7 @@ const API=(()=>{if(API_FIXED)return API_FIXED.replace(/\/$/,'');
  try{const a=new URLSearchParams(location.search).get('api');if(a){const u=new URL(a);if(u.protocol==='https:'&&u.hostname.endsWith('.trycloudflare.com'))return u.origin}}catch(e){}
  return ''})(); // пусто = демо-режим без сервера
 let S;try{S=JSON.parse(localStorage.su2)}catch(e){}
-S=S||{lang:(()=>{try{const l=new URLSearchParams(location.search).get('lang');if(l=='ru'||l=='en')return l}catch(e){}return 'ru'})(),view:'welcome',step:1,swipes:0,matches:0,p:{nick:'',age:18,gender:'',games:[],skill:{},roles:{},goal:'',about:'',photo:'',banner:{c:0,fx:'none',img:''},looking:1}};
+S=S||{lang:(()=>{try{const l=new URLSearchParams(location.search).get('lang');if(l=='ru'||l=='en')return l}catch(e){}try{const c=Telegram.WebApp.initDataUnsafe.user.language_code||'';if(c&&!/^(ru|uk|be|kk)/.test(c))return 'en'}catch(e){}return 'ru'})(),view:'welcome',step:1,swipes:0,matches:0,p:{nick:'',age:18,gender:'',games:[],skill:{},roles:{},goal:'',about:'',photo:'',banner:{c:0,fx:'none',img:''},looking:1}};
 if(S.p&&(S.p.goal=='tour'||S.p.goal=='team'))S.p.goal='ranked'; // старые цели → рейтинговая игра
 /* открыто кнопкой «Открыть анкету X» (?p=<id>) или ссылкой startapp=p_<id>: эта анкета будет первой в ленте */
 (()=>{let v='';try{v=new URLSearchParams(location.search).get('p')||''}catch(e){}if(!v)try{const sp=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.start_param;if(sp&&/^(p|ref)_\d+$/.test(sp))v=sp.split('_')[1]}catch(e){}if(/^\d{3,15}$/.test(v)){S.pin=+v;try{localStorage.su2=JSON.stringify(S)}catch(e){}}})();
@@ -1230,7 +1230,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkMatch
 /* Автообновление: Telegram держит копию приложения до 10 минут. При запуске сверяем номер версии с version.json
    (без кэша); если вышла новая — перезагружаемся по адресу с ?v=<версия>, и Telegram берёт свежий файл.
    Номер меняет tools/bump_build.py перед выкладкой. */
-var APP_BUILD='20261102113253';
+var APP_BUILD='20261102113914';
 (function(){try{var t0=Date.now();if(!window.fetch||!window.URL)return;
  fetch('version.json?_='+t0,{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){
   if(!j||!j.b||j.b===APP_BUILD)return;
