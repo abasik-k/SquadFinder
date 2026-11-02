@@ -1037,7 +1037,12 @@ async function storyCard(){const d=document.createElement('div');d.className='st
  const sBtn=sb.querySelector('[data-s]');if(sBtn)sBtn.onclick=async()=>{if(!img)return;busy(sBtn,1);const u=API?await up():'';busy(sBtn,0);if(!u)return toast(t('Не получилось загрузить картинку','Could not upload the image'));
   try{const opt={text:t('Ищу тиммейтов в SquadFinder','Looking for teammates on SquadFinder')};const pr=tgw.initDataUnsafe&&tgw.initDataUnsafe.user&&tgw.initDataUnsafe.user.is_premium;if(pr)opt.widget_link={url:link,name:'SquadFinder'};tgw.shareToStory(u,opt)}catch(e){toast(t('Stories доступны в мобильном Telegram','Stories work in the mobile Telegram app'))}};
  sb.querySelector('[data-d]').onclick=async e=>{if(!img)return;const b=e.currentTarget;busy(b,1);try{if(API&&canDl){const u=await up();if(u)tgw.downloadFile({url:u,file_name:'squadfinder-card.jpg'})}else{const a=document.createElement('a');a.href=img;a.download='squadfinder-card.jpg';document.body.appendChild(a);a.click();a.remove()}}catch(er){toast(t('Не получилось скачать','Download failed'))}busy(b,0)};
- sb.querySelector('[data-f]').onclick=()=>{close();inviteFriend()}}
+ sb.querySelector('[data-f]').onclick=async e=>{if(!img)return;const b=e.currentTarget;
+  if(!API)return toast(t('В Telegram откроется выбор чата — другу уйдёт картинка с кнопкой','In Telegram you pick a chat — your friend gets the picture with a button'));
+  const pm=tgw&&tgw.shareMessage&&tgw.isVersionAtLeast&&tgw.isVersionAtLeast('8.0');busy(b,1);const r=await api('/api/story_share',{img,mode:pm?'prepared':'send'});busy(b,0);
+  if(r&&r.id){try{tgw.shareMessage(r.id,ok=>{if(ok)toast(t('Визитка отправлена','Card sent'))});return}catch(_){}}
+  if(r&&r.sent)return toast(t('Визитка пришла тебе в чат с ботом — перешли её другу','The card is in your chat with the bot — forward it to a friend'));
+  toast(t('Не получилось отправить, попробуй ещё раз','Could not send, try again'))}}
 function preview(){const p=S.p,d=document.createElement('div');d.className='mm';d.onclick=e=>{if(e.target==d)d.remove()};
  d.innerHTML=`<div class="pvw">${card({n:p.nick,a:p.age,g:p.gender,goal:p.goal,about:[p.about,p.about],sk:p.skill,rl:p.roles,photo:p.photo,bn:bnr(p),ls:0,vc:p.vc||p.dc?1:0})}<button class="btn alt" onclick="this.closest('.mm').remove()">${t('Закрыть','Close')}</button></div>`;document.body.appendChild(d)}
 function bannerBody(p){const b=bnr(p),m=b.m,gms=p.games.filter(g=>GICO[g]),eg=gms.includes(b.g)?b.g:gms[0];
