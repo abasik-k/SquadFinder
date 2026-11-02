@@ -381,6 +381,7 @@ body.kb .two{position:static}
 .rlx{flex:none;font-style:normal;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700;color:var(--mt);background:var(--gl2);border:1px solid var(--bd);line-height:1.35}
 .gs .rlx{display:inline-block;margin:0 4px 4px 0}.gs{margin-top:6px}
 .gdt{gap:5px 6px}.gdp .gdt{display:flex;margin:2px 0 0}
+.pinb{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 13px;font-size:13px;font-weight:700;border-color:var(--g)}.pinb svg{flex:none;color:var(--g)}
 /* цвет значка пола */
 .gm{color:#4da8ff}.gf{color:#ff6fb5}
 /* статус «в сети» на карточке */
@@ -423,6 +424,8 @@ const API=(()=>{if(API_FIXED)return API_FIXED.replace(/\/$/,'');
 let S;try{S=JSON.parse(localStorage.su2)}catch(e){}
 S=S||{lang:(()=>{try{const l=new URLSearchParams(location.search).get('lang');if(l=='ru'||l=='en')return l}catch(e){}return 'ru'})(),view:'welcome',step:1,swipes:0,matches:0,p:{nick:'',age:18,gender:'',games:[],skill:{},roles:{},goal:'',about:'',photo:'',banner:{c:0,fx:'none',img:''},looking:1}};
 if(S.p&&(S.p.goal=='tour'||S.p.goal=='team'))S.p.goal='ranked'; // старые цели → рейтинговая игра
+/* открыто кнопкой «Открыть анкету X» (?p=<id>) или ссылкой startapp=p_<id>: эта анкета будет первой в ленте */
+(()=>{let v='';try{v=new URLSearchParams(location.search).get('p')||''}catch(e){}if(!v)try{const sp=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.start_param;if(sp&&/^(p|ref)_\d+$/.test(sp))v=sp.split('_')[1]}catch(e){}if(/^\d{3,15}$/.test(v)){S.pin=+v;try{localStorage.su2=JSON.stringify(S)}catch(e){}}})();
 const save=()=>{if(window.__del)return;try{localStorage.su2=JSON.stringify(S)}catch(e){}};
 const t=(r,e)=>S.lang=='ru'?r:e,esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sysLight=()=>{try{return matchMedia('(prefers-color-scheme: light)').matches}catch(e){return false}};
@@ -494,7 +497,7 @@ const localQ=()=>{const me=S.p,fg=fgOk();let c=MOCK.filter(m=>Object.keys(m.sk).
 let F={err:null,stats:null,again:0};
 async function loadQ(){F.err=null;F.stats=null;qi=0;
  if(API&&!S.synced){const pr=await pushProfile();if(!(pr&&pr.ok)){F.err=!pr?'net':pr.error=='auth'?'auth':pr.error=='bad profile'?'bad':'srv';Q=[];return}}
- const r=await api('/api/feed',{goal:S.p.goal,skill:S.p.skill,roles:S.p.roles,games:S.p.games,game:fgOk()||undefined,inc:S.finc?1:undefined,again:F.again?1:0});F.again=0;
+ const r=await api('/api/feed',{goal:S.p.goal,skill:S.p.skill,roles:S.p.roles,games:S.p.games,game:fgOk()||undefined,inc:S.finc?1:undefined,first:S.pin||undefined,again:F.again?1:0});F.again=0;
  if(!API){Q=localQ();return}
  if(!r)F.err='net';else if(r.error)F.err=r.error=='auth'?'auth':'srv';
  Q=(r&&r.items)||[];F.stats=(r&&r.stats)||null;F.ban=!!(r&&r.banned)}
@@ -523,7 +526,7 @@ function R(){if(S.view=='edit')S.view='profile';const a=$('#app'),v=S.view;
  a.innerHTML=v=='welcome'?welcome():v=='onb'?onb():v=='feed'?feed():v=='profile'?profile():v=='info'?info():tasks();
  if(v=='feed'){drag();fitCard()}if(v=='tasks'&&R.focus){const e=$('#ms-'+R.focus);e&&e.scrollIntoView({block:'center'})}countUp();if(SH.k)sheetRender()}
 
-const welcome=()=>`<div style="margin-top:30px"><span class="tag g">✦ ${t('Поиск тиммейтов','Teammate finder')}</span></div><h1 style="margin-top:14px">${t('Найди свой сквад','Find your squad')}</h1><p class="mt">${t('Тиммейты для CS2, Dota 2, Valorant, Fortnite и Deadlock. Без токсиков и случайных пабов.','Teammates for CS2, Dota 2, Valorant, Fortnite and Deadlock. No toxicity, no random pubs.')}</p>
+const welcome=()=>`<div style="margin-top:30px"><span class="tag g">✦ ${t('Поиск тиммейтов','Teammate finder')}</span></div><h1 style="margin-top:14px">${t('Найди свой сквад','Find your squad')}</h1><p class="mt">${t('Тиммейты для CS2, Dota 2, Valorant, Fortnite и Deadlock. Без токсиков и случайных пабов.','Teammates for CS2, Dota 2, Valorant, Fortnite and Deadlock. No toxicity, no random pubs.')}</p>${S.pin?`<div class="box pinb">${IH}<span>${t('Друг позвал тебя в сквад — заполни анкету, и его анкета будет первой в ленте.','A friend invited you — fill in your profile and theirs will be first in your feed.')}</span></div>`:''}
 <div class="tags" style="margin:0 0 18px">${Object.keys(G).map((g,i)=>`<span class="tag fl" style="animation-delay:${i*.35}s">${g}</span>`).join('')}</div>
 ${[['🎮',t('Анкета за минуту','Profile in a minute'),t('Игры, звание или рейтинг, роли','Games, rank or rating, roles')],['🎯',t('Лента под твою цель','Feed that fits your goal'),t('Для фана — любые игроки, для серьёзной игры — твой уровень','Fun — anyone, serious — your skill level')],['🤝',t('Контакты — только взаимно','Contacts only when mutual'),t('Контакт откроется, когда вы оба нажмёте «В сквад»','Contacts open when you both tap “Squad up”')],['👑',t('Значок «Олд»','“OG” badge'),t('Навсегда — первым 500 анкетам','Forever — for the first 500 profiles')]].map(x=>`<div class="box feat"><div class="ic">${x[0]}</div><div><b>${x[1]}</b><div class="mt" style="margin:3px 0 0">${x[2]}</div></div></div>`).join('')}
 <button class="btn" style="margin-top:10px" onclick="S.view='onb';S.step=1;save();R()">${t('Создать анкету','Create profile')} →</button>`;
@@ -797,7 +800,7 @@ function cardMenu(){const m=Q[qi];if(!m)return;const d=document.createElement('d
   d.remove();if(m.lm&&M&&M.incoming>0){M.incoming--;updHB()}Q.splice(qi,1);R();
   toast(reason=='hide'?t('Анкета скрыта','Profile hidden'):t('Спасибо! Жалоба отправлена, анкета скрыта','Thanks! Report sent, profile hidden'))};
  $('#rpts').onclick=e=>why&&go2(why,e.currentTarget);$('#rpth').onclick=e=>go2('hide',e.currentTarget)}
-function swipe(like){const m=Q[qi];if(!m)return;if(m.lm&&M&&M.incoming>0){M.incoming--;setTimeout(updHB,0)}S.swipes++;qi++;save();R();hap(like?'medium':'light');
+function swipe(like){const m=Q[qi];if(!m)return;if(S.pin&&m.id==S.pin)delete S.pin;if(m.lm&&M&&M.incoming>0){M.incoming--;setTimeout(updHB,0)}S.swipes++;qi++;save();R();hap(like?'medium':'light');
  api('/api/swipe',{to:m.id,like:!!like}).then(r=>{const hit=API?!!(r&&r.match):(like&&Math.random()<.3);if(hit){S.matches++;save();showMatch(m,r&&r.contact,r&&r.username,API?r:{dc:'demo_player',st:'https://steamcommunity.com/id/demo',fc:'demo_fc',ri:'Demo#EUW'})}})}
 /* Discord/Steam: видны только после мэтча. Значения проверены сервером (латиница, цифры, _ . - #) */
 const okDc=s=>/^[A-Za-z0-9_.]{2,32}(#\d{4})?$/.test(s),okSt=s=>/^(https?:\/\/)?(www\.)?steamcommunity\.com\/(id|profiles)\/[A-Za-z0-9_-]{2,64}\/?$/.test(s)||/^[A-Za-z0-9_-]{2,64}$/.test(s);
@@ -1227,7 +1230,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkMatch
 /* Автообновление: Telegram держит копию приложения до 10 минут. При запуске сверяем номер версии с version.json
    (без кэша); если вышла новая — перезагружаемся по адресу с ?v=<версия>, и Telegram берёт свежий файл.
    Номер меняет tools/bump_build.py перед выкладкой. */
-var APP_BUILD='20261102112322';
+var APP_BUILD='20261102113253';
 (function(){try{var t0=Date.now();if(!window.fetch||!window.URL)return;
  fetch('version.json?_='+t0,{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){
   if(!j||!j.b||j.b===APP_BUILD)return;
