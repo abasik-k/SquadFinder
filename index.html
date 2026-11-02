@@ -473,6 +473,45 @@ body.kb .fvw .fvs button:first-child{border-top:1px solid var(--bd)}body.kb .fvw
 .bst2 .bx{flex:1;min-width:0}.bst2 b{display:block;font-size:13.5px;font-weight:800}.bst2 small{display:block;font-size:12px;color:var(--mt);font-weight:600;margin-top:1px}
 .bst2 .tk{font-size:13px;padding:6px 11px;flex:none}
 .dn{color:var(--mt);font-size:12.5px;font-weight:700;text-align:center;margin:10px 0 4px}
+
+/* ===== Без «нейрослопа» (решение владельца 02.11.2026). Суть та же, убраны типовые приёмы ИИ-дизайна:
+   градиент зелёный→лайм на всём, декоративное свечение, бегущий блик на кнопках, пятна на фоне,
+   плавающие элементы, каскадное появление блоков, КАПС в подписях. Зелёный — сплошной; лайм остаётся только у ⚡.
+   Косметика игроков (свечение gl, анимации fx, цвет ника nc) не тронута. */
+.bg{display:none}
+h1{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--tx);font-size:32px;line-height:1.08;letter-spacing:-.03em}
+.logo i{background:var(--g);box-shadow:none}
+.btn{background:var(--g);color:#04170c;box-shadow:none;border-radius:14px;transition:transform .15s,background-color .15s}
+.btn::after{display:none}
+.btn:not(.alt):not(:disabled):hover{background:#3ef09c}
+.btn:not(.alt):active{background:#1bc877}
+.lang .on,.tag.pick.on,.fgr .tag.on,.sw.on,.sw.on .kn,.bt2.go,.hbs.go,.lk,.stamp.l,.bnw .bedit,.bsi,.bst2 .bic,.gpr em{background:var(--g);box-shadow:none}
+.tag.pick.on{transform:none}
+.tabs::before{background:var(--g);box-shadow:none;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.tag.g{background:#22e58a1f;border-color:#22e58a59}
+.li.on,.opt.on{background:#22e58a1a;box-shadow:inset 0 0 0 1px var(--g)}
+.bd.on,.gd.on .e{background:#22e58a14}
+.bst,.bb,.bt2,.bst2{background:var(--gl2);border-color:var(--bd)}
+.ad,.ad2{background:transparent}
+input[type=range]{background:linear-gradient(var(--g),var(--g)) 0/var(--p,30%) 100% no-repeat,var(--gl2)}
+.prog i,.mis .pg i,.tkr .pg i{background:var(--g);box-shadow:none}
+.stat b{background:none;color:var(--g)}
+.ph{background-image:linear-gradient(160deg,#0f2a1d,#07120c)}
+.ph i{background:none;color:var(--g);filter:none}
+.box{box-shadow:none;border-radius:18px}
+.fl{animation:none}
+#app.in>*:not(.act){animation:inf .18s ease-out backwards!important}
+@keyframes inf{from{opacity:0}}
+label.l{font-size:13px;letter-spacing:0;text-transform:none;margin:16px 0 7px}
+.sh small{letter-spacing:0;font-size:13px}
+.ad i,.ad2 i{letter-spacing:.02em;text-transform:none;font-size:11px}
+/* приветствие: преимущества списком в одной рамке, а не четырьмя одинаковыми карточками */
+.feat{display:flex;gap:14px;align-items:flex-start;margin:0;padding:14px 2px;border-top:1px solid var(--bd)}
+.feat+.btn{margin-top:18px!important}
+.feat .ic{width:auto;height:auto;border:0;background:none;font-size:22px;padding-top:1px;color:var(--g)}
+.feat b{font-size:15px}.feat .mt{margin:2px 0 0}
+:root[data-theme=light] .btn:not(.alt){background:#1fd27f}@media (prefers-color-scheme:light){:root:not([data-theme=dark]) .btn:not(.alt){background:#1fd27f}}
+:root[data-theme=light] .ph{background-image:linear-gradient(160deg,#0f2a1d,#07120c)}@media (prefers-color-scheme:light){:root:not([data-theme=dark]) .ph{background-image:linear-gradient(160deg,#0f2a1d,#07120c)}}
 </style></head><body><div class="bg"><i></i><i></i><i></i></div><div class="hd" id="hdw"></div><div id="app"></div><div id="toast" role="status" aria-live="polite"></div>
 <script type="text/plain" id="app-src">
 const $=s=>document.querySelector(s),tgw=window.Telegram&&Telegram.WebApp;tgw&&(tgw.ready(),tgw.expand());
@@ -586,10 +625,10 @@ function R(){if(S.view=='edit')S.view='profile';try{document.documentElement.lan
  a.innerHTML=v=='welcome'?welcome():v=='onb'?onb():v=='feed'?feed():v=='profile'?profile():v=='info'?info():tasks();
  if(v=='feed'){drag();fitCard()}if(v=='tasks'&&R.focus){const e=$('#ms-'+R.focus);e&&e.scrollIntoView({block:'center'})}countUp();if(SH.k)sheetRender();fitHbd()}
 
-const welcome=()=>`<div style="margin-top:30px"><span class="tag g">✦ ${t('Поиск тиммейтов','Teammate finder')}</span></div><h1 style="margin-top:14px">${t('Найди свой сквад','Find your squad')}</h1><p class="mt">${t('Тиммейты для CS2, Dota 2, Valorant, Fortnite и Deadlock. Без токсиков и случайных пабов.','Teammates for CS2, Dota 2, Valorant, Fortnite and Deadlock. No toxicity, no random pubs.')}</p>${S.pin?`<div class="box pinb">${IH}<span>${t('Друг позвал тебя в сквад — заполни анкету, и его анкета будет первой в ленте.','A friend invited you — fill in your profile and theirs will be first in your feed.')}</span></div>`:''}
-<div class="tags" style="margin:0 0 18px">${Object.keys(G).map((g,i)=>`<span class="tag fl" style="animation-delay:${i*.35}s">${g}</span>`).join('')}</div>
-${[['🎮',t('Анкета за минуту','Profile in a minute'),t('Игры, звание или рейтинг, роли','Games, rank or rating, roles')],['🎯',t('Лента под твою цель','Feed that fits your goal'),t('Для фана — любые игроки, для серьёзной игры — твой уровень','Fun — anyone, serious — your skill level')],['🤝',t('Контакты — только взаимно','Contacts only when mutual'),t('Контакт откроется, когда вы оба нажмёте «В сквад»','Contacts open when you both tap “Squad up”')],['👑',t('Значок «Олд»','“OG” badge'),t('Навсегда — первым 500 анкетам','Forever — for the first 500 profiles')]].map(x=>`<div class="box feat"><div class="ic">${x[0]}</div><div><b>${x[1]}</b><div class="mt" style="margin:3px 0 0">${x[2]}</div></div></div>`).join('')}
-<button class="btn" style="margin-top:10px" onclick="S.view='onb';S.step=1;save();R()">${t('Создать анкету','Create profile')} →</button>`;
+const welcome=()=>`<h1 style="margin-top:34px">${t('Найди свой сквад','Find your squad')}</h1><p class="mt">${t('Тиммейты для CS2, Dota 2, Valorant, Fortnite и Deadlock. Без токсиков и случайных пабов.','Teammates for CS2, Dota 2, Valorant, Fortnite and Deadlock. No toxicity, no random pubs.')}</p>${S.pin?`<div class="box pinb">${IH}<span>${t('Друг позвал тебя в сквад — заполни анкету, и его анкета будет первой в ленте.','A friend invited you — fill in your profile and theirs will be first in your feed.')}</span></div>`:''}
+<div class="tags" style="margin:0 0 18px">${Object.keys(G).map((g,i)=>`<span class="tag">${g}</span>`).join('')}</div>
+${[['🎮',t('Анкета за минуту','Profile in a minute'),t('Игры, звание или рейтинг, роли','Games, rank or rating, roles')],['🎯',t('Лента под твою цель','Feed that fits your goal'),t('Для фана — любые игроки, для серьёзной игры — твой уровень','Fun — anyone, serious — your skill level')],['🤝',t('Контакты — только взаимно','Contacts only when mutual'),t('Контакт откроется, когда вы оба нажмёте «В сквад»','Contacts open when you both tap “Squad up”')],['👑',t('Значок «Олд»','“OG” badge'),t('Навсегда — первым 500 анкетам','Forever — for the first 500 profiles')]].map(x=>`<div class="feat"><span class="ic">${x[0]}</span><div><b>${x[1]}</b><div class="mt">${x[2]}</div></div></div>`).join('')}
+<button class="btn" style="margin-top:10px" onclick="S.view='onb';S.step=1;save();R()">${t('Создать анкету','Create profile')}</button>`;
 
 const STEPS=[['Профиль','Profile'],['Игры','Games'],['Уровень','Skill'],['Роли','Roles'],['Цель и фото','Goal & photo']];
 function onb(){const p=S.p,s=S.step;let b='';
@@ -603,8 +642,8 @@ function onb(){const p=S.p,s=S.step;let b='';
  <label class="l">${t('Как связаться','How to team up')}</label>${discBlock(p)}
  <input type="file" accept="image/*" id="fl" onchange="photo(this)" style="position:absolute;left:0;width:1px;height:1px;opacity:0;pointer-events:none"><label class="l">${t('Оформление','Look')}</label><div class="r2" style="margin-top:0"><label for="fl" class="btn alt" style="cursor:pointer">📷 ${p.photo?t('Заменить фото','Change photo'):t('Фото','Photo')}</label><button class="btn alt" onclick="preview()">👁 ${t('Как увидят','Preview')}</button></div>
  <label class="l">${t('О себе','About')} <span id="cn">${p.about.length}/200</span></label><textarea rows="2" maxlength="200" data-done enterkeyhint="done" oninput="S.p.about=this.value;$('#cn').textContent=this.value.length+'/200';save()" placeholder="${t('Прайм-тайм, любимые карты, манера игры…','Prime time, favorite maps, playstyle…')}">${esc(p.about)}</textarea>`;
- return `<div class="prog"><i style="width:${s*20}%"></i></div><div class="sh"><small>${t('ЭТАП','STEP')} ${s}/5</small><h2>${t(STEPS[s-1][0],STEPS[s-1][1])}</h2></div>${b}
- <div class="act">${s>1?`<button class="btn alt" onclick="S.step--;R();scrollTo(0,0)">←</button>`:`<button class="btn alt" onclick="S.view='welcome';R()">✕</button>`}<button class="btn" id="nx" ${ok()?'':'disabled'} onclick="nxt()">${s<5?t('Далее','Next')+' →':t('Опубликовать','Publish')}</button></div>`}
+ return `<div class="prog"><i style="width:${s*20}%"></i></div><div class="sh"><small>${t('Шаг','Step')} ${s} ${t('из','of')} 5</small><h2>${t(STEPS[s-1][0],STEPS[s-1][1])}</h2></div>${b}
+ <div class="act">${s>1?`<button class="btn alt" onclick="S.step--;R();scrollTo(0,0)">←</button>`:`<button class="btn alt" onclick="S.view='welcome';R()">✕</button>`}<button class="btn" id="nx" ${ok()?'':'disabled'} onclick="nxt()">${s<5?t('Далее','Next'):t('Опубликовать','Publish')}</button></div>`}
 
 /* Блок «уровень»: сначала выбираешь ОДИН способ (для CS2 — Premier / Faceit / звание), и только потом появляется ввод */
 function skillBox(g){const d=G[g],s=S.p.skill[g];
@@ -1193,7 +1232,7 @@ async function setNudges(){const v=S.nudges===0?1:0;S.nudges=v;save();R();
  if(API){const r=await api('/api/settings',{nudges:v});if(!(r&&r.ok)){S.nudges=v?0:1;save();R();return toast(t('Не получилось. Попробуй ещё раз','Something went wrong. Try again'))}}
  toast(v?t('Напоминания включены','Reminders on'):t('Напоминания выключены','Reminders off'))}
 function info(){const ch=(M&&M.channel)||CH;
- return `<div class="box ifo"><div class="ifh"><div class="logo"><i></i>SquadFinder</div><span class="tag g">${t('Поиск тиммейтов','Teammate finder')}</span></div>
+ return `<div class="box ifo"><div class="ifh"><div class="logo"><i></i>SquadFinder</div></div>
   <p>${t('Находим тиммейтов для CS2, Dota 2, Valorant, Fortnite и Deadlock. Анкета за минуту, лента под твой уровень, контакты — только по взаимному лайку.','We find teammates for CS2, Dota 2, Valorant, Fortnite and Deadlock. A profile in a minute, a feed that fits your level, contacts only on a mutual like.')}</p>
   <button class="btn alt" onclick="openChannel()">${SV(ITG,16)} ${t('Канал','Channel')} @${esc(ch)}</button></div>
  <div class="box faq"><b>${t('Частые вопросы','FAQ')}</b>${[
@@ -1318,7 +1357,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkMatch
 /* Автообновление: Telegram держит копию приложения до 10 минут. При запуске сверяем номер версии с version.json
    (без кэша); если вышла новая — перезагружаемся по адресу с ?v=<версия>, и Telegram берёт свежий файл.
    Номер меняет tools/bump_build.py перед выкладкой. */
-var APP_BUILD='20261102174812';
+var APP_BUILD='20261102223657';
 (function(){try{var t0=Date.now();if(!window.fetch||!window.URL)return;
  fetch('version.json?_='+t0,{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){
   if(!j||!j.b||j.b===APP_BUILD)return;
