@@ -1224,6 +1224,18 @@ setInterval(updHB,60000); // таймер буста в шапке
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkMatches()});
 </script>
 <script>
+/* Автообновление: Telegram держит копию приложения до 10 минут. При запуске сверяем номер версии с version.json
+   (без кэша); если вышла новая — перезагружаемся по адресу с ?v=<версия>, и Telegram берёт свежий файл.
+   Номер меняет tools/bump_build.py перед выкладкой. */
+var APP_BUILD='20261102112322';
+(function(){try{var t0=Date.now();if(!window.fetch||!window.URL)return;
+ fetch('version.json?_='+t0,{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){
+  if(!j||!j.b||j.b===APP_BUILD)return;
+  var u=new URL(location.href);if(u.searchParams.get('v')===j.b)return; // уже перезагружались на эту версию — не зацикливаемся
+  if(Date.now()-t0>8000)return; // сеть медленная, игрок уже пользуется — обновится при следующем открытии
+  u.searchParams.set('v',j.b);location.replace(u.toString())}).catch(function(){})}catch(e){}})();
+</script>
+<script>
 /* Загрузчик: скрипт Telegram грузится без блокировки страницы. Если telegram.org недоступен (бывает без VPN),
    через 3 секунды приложение стартует само: initData берётся из адреса, "ready" отправляется напрямую в Telegram. */
 (function(){var started=0;
