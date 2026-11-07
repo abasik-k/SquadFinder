@@ -123,7 +123,7 @@ table{width:100%;border-collapse:collapse}td{border-top:1px solid var(--bd);padd
 .bd span{font-size:26px;filter:grayscale(1);opacity:.35}.bd.on{border-color:#22e58a77;background:linear-gradient(135deg,#22e58a1c,#c6f4320e)}.bd.on span{filter:none;opacity:1;animation:pop .5s backwards}
 .bd:not(.on){color:var(--mt)}
 .mis{display:flex;gap:12px;align-items:center}.mis .pg{height:10px;border-radius:9px;background:var(--gl2);flex:1;overflow:hidden}.mis .pg i{display:block;height:100%;background:linear-gradient(90deg,var(--g),var(--lm));border-radius:9px;box-shadow:0 0 12px var(--g);transition:width 1s cubic-bezier(.2,.9,.3,1)}
-#toast{position:fixed;left:50%;background:var(--hb);backdrop-filter:blur(20px);border:1px solid var(--g);color:var(--tx);padding:12px 18px;border-radius:24px;opacity:0;pointer-events:none;transition:background-color .3s,background .3s,border-color .3s,color .3s,box-shadow .3s,transform .3s,opacity .3s,left .3s;z-index:60;max-width:90%;text-align:center;font-weight:600;line-height:1.35}#toast.on{opacity:1}
+#toast{position:fixed;left:50%;background:var(--hb);backdrop-filter:blur(20px);border:1px solid var(--g);color:var(--tx);padding:12px 18px;border-radius:24px;opacity:0;pointer-events:none;transition:background-color .3s,background .3s,border-color .3s,color .3s,box-shadow .3s,transform .3s,opacity .3s,left .3s;z-index:60;width:max-content;max-width:min(440px,calc(100vw - 32px));box-sizing:border-box;text-align:center;font-weight:600;line-height:1.35;text-wrap:balance}#toast.on{opacity:1}
 .hint{font-size:12px;color:var(--mt);margin-top:8px}
 .mm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(2,10,6,.78);backdrop-filter:blur(12px);animation:fade .3s;padding:20px}@keyframes fade{from{opacity:0}}
 .mmc{background:var(--hb);border:1px solid var(--g);border-radius:28px;padding:28px 24px;text-align:center;max-width:340px;width:100%;box-shadow:0 0 70px #22e58a55;animation:zoom .5s cubic-bezier(.2,1.4,.4,1)}@keyframes zoom{from{transform:scale(.6);opacity:0}}
@@ -529,7 +529,7 @@ label.l{font-size:13px;letter-spacing:0;text-transform:none;margin:16px 0 7px}
 </style></head><body><div class="hd" id="hdw"></div><div id="app"></div><div id="toast" role="status" aria-live="polite"></div>
 <script type="text/plain" id="app-src">
 const $=s=>document.querySelector(s),tgw=window.Telegram&&Telegram.WebApp;tgw&&(tgw.ready(),tgw.expand());
-const API_FIXED='https://185-130-224-64.sslip.io'; // постоянный адрес вашего сервера (https://...). Если пусто — адрес берётся из ?api= (его передаёт бот)
+const API_FIXED='https://squadfinder-app.ru'; // постоянный адрес вашего сервера (https://...). Если пусто — адрес берётся из ?api= (его передаёт бот)
 const API=(()=>{if(API_FIXED)return API_FIXED.replace(/\/$/,'');
  try{const a=new URLSearchParams(location.search).get('api');if(a){const u=new URL(a);if(u.protocol==='https:'&&u.hostname.endsWith('.trycloudflare.com'))return u.origin}}catch(e){}
  return ''})(); // пусто = демо-режим без сервера
@@ -1102,12 +1102,14 @@ function safeInfo(){const d=document.createElement('div');d.className='mm';d.onc
 async function steamLink(b){if(!API){S.ver={st:'76561198000000000',fc:{n:S.p.nick||'player',l:8,e:1820},dt:null,fk:1};S.p.st=S.ver.st;save();R();return toast(t('Демо: Steam привязан ✓','Demo: Steam linked ✓'))}
  if(b)b.disabled=true;const r=await api('/api/steam_start',{});if(b)b.disabled=false;
  if(!r||!r.url)return toast(r&&r.error=='rate'?t('Слишком часто, подожди немного','Too fast, wait a bit'):t('Не получилось, попробуй ещё раз','Something went wrong, try again'));
- S.stp=Date.now();save();try{tgw&&tgw.openLink?tgw.openLink(r.url):window.open(r.url,'_blank')}catch(e){window.open(r.url,'_blank')}}
-async function steamBack(){if(!API||!S.stp||Date.now()-S.stp>15*60e3)return;const r=await api('/api/me',{});
- if(r&&r.ver){S.ver=r.ver;S.stp=0;S.p.st=r.ver.st;save();R();hap('medium');toast(t('Steam привязан ✓','Steam linked ✓'))}}
+ S.stp=Date.now();save();steamPoll();try{tgw&&tgw.openLink?tgw.openLink(r.url):window.open(r.url,'_blank')}catch(e){window.open(r.url,'_blank')}}
+function steamPoll(){clearInterval(steamPoll.t);steamPoll.t=setInterval(()=>{if(!S.stp||Date.now()-S.stp>15*60e3){clearInterval(steamPoll.t);return}steamBack()},4000)}
+async function steamBack(){if(!API||!S.stp||steamBack.busy)return;if(Date.now()-S.stp>15*60e3){S.stp=0;save();return}steamBack.busy=1;let r=null;try{r=await api('/api/ver',{})}finally{steamBack.busy=0}
+ if(r&&r.ver){clearInterval(steamPoll.t);S.ver=r.ver;S.stp=0;S.p.st=r.ver.st;if(S.view!='onb')S.view='profile';save();R();hap('medium');toast(t('Steam привязан ✓','Steam linked ✓'))}}
 async function unlinkSteam(){if(API){const r=await api('/api/unlink',{});if(!r||!r.ok)return toast(t('Не получилось, попробуй ещё раз','Something went wrong, try again'))}
  if(S.ver&&S.p.st==S.ver.st)S.p.st='';S.ver=null;save();R();toast(t('Steam отвязан','Steam unlinked'))}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)steamBack()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)steamBack()});window.addEventListener('focus',()=>steamBack());
+setTimeout(()=>{if(S.stp){steamBack();steamPoll()}},1200); // приложение открыли заново кнопкой «Вернуться в Telegram»
 /* Подробности по игре таблицей: Роли · Пик · Опыт · Любимое. В свёрнутой карточке видна только строка «Роли» */
 const gex=(g,sk,vf)=>!!((g=='CS2'&&vf&&vf.fl)||(g=='Dota 2'&&vf&&vf.dr)||favOf(g,sk).length||pkTxt(g,sk)||(sk&&HXL[sk.hx]));
 const gdl=(g,sk,rs,gg,vf)=>{const f=favOf(g,sk),pk=pkTxt(g,sk),hx=sk&&HXL[sk.hx],og=sk&&sk.gl&&gg&&goalOf(sk.gl)!=goalOf(gg)?GOALS.find(x=>x[0]==goalOf(sk.gl)):null,fv=g=='CS2'&&vf&&vf.fl?vf:null,dv=g=='Dota 2'&&vf&&vf.dr?vf:null,row=(l,v,x)=>`<dt${x?' class="gx2"':''}>${l}</dt><dd${x?' class="gx2"':''}>${v}</dd>`;
@@ -1422,7 +1424,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkMatch
 /* Автообновление: Telegram держит копию приложения до 10 минут. При запуске сверяем номер версии с version.json
    (без кэша); если вышла новая — перезагружаемся по адресу с ?v=<версия>, и Telegram берёт свежий файл.
    Номер меняет tools/bump_build.py перед выкладкой. */
-var APP_BUILD='20261107022451';
+var APP_BUILD='20261107042644';
 (function(){try{var t0=Date.now();if(!window.fetch||!window.URL)return;
  fetch('version.json?_='+t0,{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){
   if(!j||!j.b||j.b===APP_BUILD)return;
