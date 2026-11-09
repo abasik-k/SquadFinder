@@ -668,6 +668,39 @@ label.l{font-size:13px;letter-spacing:0;text-transform:none;margin:16px 0 7px}
 .abx2.q{border-style:dashed}.abx2.q .abt>span{color:var(--mt)}
 :root[data-theme=light] .abx2 .abp{color:#0b9a5b}
 @media (prefers-color-scheme:light){:root:not([data-theme=dark]) .abx2 .abp{color:#0b9a5b}}
+
+/* 09.11: значок пола ровно по центру строки; аватарка крупнее + разовая подсказка */
+.pinf>span{display:inline-flex;align-items:center;gap:1px}
+.pinf>span>svg{flex:none}
+.top{position:relative}
+.hav{width:40px;height:40px;border-radius:13px;font-size:17px}
+.hav::after{border-radius:16px}
+.hnt{position:absolute;right:-2px;top:calc(100% - 2px);z-index:7;padding:8px 12px;border:0;border-radius:11px;background:var(--g);color:#05220f;font:700 12.5px Manrope,sans-serif;white-space:nowrap;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.3);animation:hnin .35s ease-out both}
+.hnt::before{content:'';position:absolute;right:17px;top:-5px;width:10px;height:10px;background:inherit;transform:rotate(45deg);border-radius:2px}
+.hnt::after{content:'';position:absolute;inset:-6px}
+@keyframes hnin{from{opacity:0;transform:translateY(-4px)}}
+.hnt.out{opacity:0;transform:translateY(-4px);transition:opacity .3s,transform .3s}
+@media (prefers-reduced-motion:reduce){.hnt{animation:none}}
+
+/* 09.11: карточка по полочкам — на фото ник/возраст/«в сети», флажок в углу, факты строкой под фото; значков нет */
+.card .ov{padding:48px 16px 14px}
+.card .ovr{min-width:0}
+.card .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .ovs{margin-top:3px}
+.card.hb .ph>.cflag{position:absolute;left:12px;top:12px;z-index:2;margin:0;width:32px;height:32px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.cfx{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:2px 0 10px}
+.cfx>span{display:inline-flex;align-items:center;gap:4px;height:25px;box-sizing:border-box;padding:0 8px;letter-spacing:-.01em;border-radius:999px;font-size:12px;font-weight:700;background:var(--gl2);border:1px solid var(--bd);color:var(--tx)}
+.cfx>span svg{flex:none}
+.cfx>.gtg{color:var(--g);border-color:rgba(34,229,138,.45);background:rgba(34,229,138,.1)}
+.cfx>.mcb svg,.cfx>.svb .vsh{color:var(--g)}
+.cfx>.mcb.off{color:var(--mt)}.cfx>.mcb.off svg{color:var(--mt)}
+.cfx>.vcb svg{color:#8c96ff}
+:root[data-theme=light] .cfx>.gtg,:root[data-theme=light] .cfx>.mcb svg,:root[data-theme=light] .cfx>.svb .vsh{color:#0b8a50}
+:root[data-theme=light] .cfx>.vcb svg{color:#4f5bd5}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]) .cfx>.gtg,:root:not([data-theme=dark]) .cfx>.mcb svg,:root:not([data-theme=dark]) .cfx>.svb .vsh{color:#0b8a50}:root:not([data-theme=dark]) .cfx>.vcb svg{color:#4f5bd5}}
+.card.tight .cfx{margin-bottom:6px}
+.cfx>span svg{width:12px;height:12px}
+.card .in .gr2.hx{position:relative;padding-right:40px}.card .in .gr2.hx>.gbx{position:absolute;right:0;top:6px;margin:0}
 </style></head><body><div class="hd" id="hdw"></div><div id="app"></div><div id="toast" role="status" aria-live="polite"></div>
 <script type="text/plain" id="app-src">
 const $=s=>document.querySelector(s),tgw=window.Telegram&&Telegram.WebApp;tgw&&(tgw.ready(),tgw.expand());
@@ -786,14 +819,21 @@ function setHead(show){const w=$('#hdw'),k=S.lang+show+effTheme();if(w.dataset.k
  const tb=w.querySelector('.tabs');if(tb){const ti=TABS.indexOf(S.view);tb.style.setProperty('--i',Math.max(0,ti));tb.classList.toggle('np',ti<0);tb.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',TABS[i]==S.view))}
  const hv=w.querySelector('#hav');if(hv){const p=S.p||{},gc=BC[bnr(p).gl],k=(p.photo||'').length+(p.photo||'').slice(-24)+(p.nick||'')+(gc?gc[1]:'');
   if(hv.dataset.k!=k){hv.dataset.k=k;hv.style.cssText=(p.photo?PH(p.photo)+';':'')+(gc?'--hc:'+gc[1]:'');hv.textContent=p.photo?'':((p.nick||'?')[0]||'?').toUpperCase()}
-  hv.classList.toggle('on',S.view=='profile');hv.setAttribute('aria-current',S.view=='profile'?'page':'false')}}
+  hv.classList.toggle('on',S.view=='profile');hv.setAttribute('aria-current',S.view=='profile'?'page':'false')}
+ /* разовая подсказка, где теперь профиль: пропадает, когда профиль открыли */
+ if(S.view=='profile'&&!S.hpSeen){S.hpSeen=1;save()}
+ let hn=w.querySelector('.hnt');
+ if(hv&&!S.hpSeen&&!setHead.hs&&(S.hpN||0)<3&&S.view!='profile'){setHead.hs=1;S.hpN=(S.hpN||0)+1;save();  // раз за запуск, не больше 3 раз, сама гаснет через 6 с
+  hn=document.createElement('button');hn.className='hnt';hn.textContent=t('Твой профиль — тут','Your profile is here');hn.onclick=()=>go('profile');w.querySelector('.top').appendChild(hn);
+  setTimeout(()=>{hn.classList.add('out');setTimeout(()=>hn.remove(),300)},6000)}
+ else if(hn&&(S.view=='profile'||!hv))hn.remove()}
 function countUp(){document.querySelectorAll('.cnt').forEach(e=>{const n=+e.dataset.n||0;let i=0;const st=()=>{i++;e.textContent=Math.round(n*Math.min(i/24,1));if(i<24)requestAnimationFrame(st)};st()})}
 function R(){if(S.view=='edit')S.view='profile';try{document.documentElement.lang=S.lang}catch(e){}const a=$('#app'),v=S.view;
  if(syncing){setHead(false);R.k='';a.className='';a.innerHTML=`<div class="box empty" style="margin-top:80px"><div style="font-size:40px">💚</div><h2 style="margin-top:8px">${t('Загружаем анкету…','Loading your profile…')}</h2></div>`;return}
  setHead(IDS.includes(v));
  const k=v+(v=='onb'?S.step:'');a.className=k!=R.k?'in':'';R.k=k;
  a.innerHTML=v=='welcome'?welcome():v=='onb'?onb():v=='feed'?feed():v=='profile'?profile():v=='info'?info():tasks();
- if(v=='feed'){fgInit();drag();fitCard();if(R.cin){const c=$('#cd');c&&c.classList.add('cin')}R.cin=0}if(v=='tasks'&&R.focus){const e=$('#ms-'+R.focus);e&&e.scrollIntoView({block:'center'})}countUp();if(SH.k)sheetRender();fitHbd();window.kbSync&&kbSync()}
+ if(v=='feed'){fgInit();drag();fitCard();if(R.cin){const c=$('#cd');c&&c.classList.add('cin')}R.cin=0}if(v=='tasks'&&R.focus){const e=$('#ms-'+R.focus);e&&e.scrollIntoView({block:'center'})}countUp();if(SH.k)sheetRender();window.kbSync&&kbSync()}
 
 const wDemo=()=>`<div class="wdm" aria-hidden="true">${[['Z','Zaryad','CS2','Faceit 8'],['M','Mira','Valorant','Gold']].map((x,i)=>`<div class="wdc wd${i}"><span class="wav">${x[0]}</span><span class="wtx"><b>${x[1]}</b><small>${gI(x[2],16)}${x[2]} · ${x[3]}</small></span><span class="wbt">${t('В сквад','Squad up')}</span></div>`).join('')}</div>`;
 const welcome=()=>`${wDemo()}<h1 style="margin-top:10px">${t('Найди свой сквад','Find your squad')}</h1><p class="mt">${t('Тиммейты для CS2, Dota 2, Valorant, Fortnite и Deadlock. Без токсиков и случайных пабов.','Teammates for CS2, Dota 2, Valorant, Fortnite and Deadlock. No toxicity, no random pubs.')}</p>${S.pin?`<div class="box pinb">${IH}<span>${t('Друг позвал тебя в сквад — заполни анкету, и его анкета будет первой в ленте.','A friend invited you — fill in your profile and theirs will be first in your feed.')}</span></div>`:''}
@@ -995,9 +1035,9 @@ const BDG=[['channel','📢','Подписчик','Subscriber','Подпишис
  ['match','💚','Первый мэтч','First match','Получи взаимный лайк от другого игрока','Get a mutual like from another player'],
  ['invite','👥','Душа сквада','Squad builder','Пригласи друга по своей ссылке — он должен создать анкету','Invite a friend via your link — they must create a profile']];
 
-function card(m,live){const all=Object.keys(m.sk).sort((a,b)=>(S.p.games.includes(b)?1:0)-(S.p.games.includes(a)?1:0)),fg=live?(fgOk()&&m.sk[fgOk()]?fgOk():S.p.games.length==1&&m.sk[S.p.games[0]]?S.p.games[0]:''):'',gs=fg?[fg]:all,more=fg?all.filter(g=>g!=fg):[],goal=GOALS.find(x=>x[0]==goalOf(fg&&m.sk[fg]&&m.sk[fg].gl||m.goal)),ab=m.about[S.lang=='ru'?0:1]||m.about[0],bn=m.bn||{m:'auto'},gli=bnr({banner:bn}).gl,gc=BC[gli],gx=GLX[gli]||'',bds=(m.bd||[]).filter(x=>BDG.some(b=>b[0]==x));
- return `<div class="card hb${gc?' gw':''}${fg?' ex':''} ${gx}" ${live?'id="cd"':''} ${gc&&!gx?`style="${glowVars(gc[1])}"`:''}><div class="cb">${bannerHtml({banner:bn,games:gs},0,0,1)}</div>${live?``:''}<div class="ph" style="${m.photo?`background-image:url(${m.photo});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#0b1a14`:''}">${m.photo?'':`<i>${esc((m.n||'?')[0]).toUpperCase()}</i>`}${m.lm||m.bs?`<div class="trt">${m.lm?`<span class="lk">💚 ${t('Зовёт в сквад','Wants you in')}</span>`:''}${m.bs?`<span class="bsb">${SV(ROCKET,14)}${t('Буст','Boost')}</span>`:''}</div>`:''}${live?`<span class="stamp l" id="sl">${IH} ${t('В сквад','Squad up')}</span><span class="stamp n" id="sn">${IX} ${t('Скип','Skip')}</span>`:''}<div class="ov"><div class="ovr"><b class="nm ${bn.nc?'nc-'+bn.nc:''}">${esc(m.n)||'—'}</b><span class="ag">${gnd(m.g)}${m.a}</span></div>${true?`<div class="ovs"><span class="gtg">${t(goal[1],goal[2])}</span>${m.ls<3?`<span class="lsn s${m.ls}"><i></i>${[t('В сети','Online'),t('Был(а) сегодня','Active today'),t('Был(а) недавно','Active recently')][m.ls]}</span>`:''}${micBadge(m.mc)}${m.vc?`<span class="vcb">${SV(IHS,13)}Discord</span>`:''}${m.vf&&m.vf.s?`<span class="svb" role="button" tabindex="0" onclick="event.stopPropagation();vInfo('st')">${VSH(13)}Steam</span>`:''}${live?`<button class="cflag" onclick="event.stopPropagation();cardMenu()" aria-label="${t('Пожаловаться','Report')}" title="${t('Пожаловаться','Report')}">${SV(IFLAG,15)}</button>`:''}</div>`:''}${bds.length?`<div class="bdr" onclick="event.stopPropagation();showBadges('${bds.join(',')}')">${bds.map(id=>`<span class="bdc">${BDG.find(b=>b[0]==id)[1]}</span>`).join('')}<span class="bdq" title="${t('Что за значки?','What are these badges?')}">?</span></div>`:''}</div></div>
- <div class="in">${gs.map(g=>{const x=!fg&&gex(g,m.sk[g],m.vf);return `<div class="gb${fg?' ex':''}"><div class="gr2">${gI(g,28)}<b>${g}</b>${rk(g,m.sk[g])}${g=='CS2'?fcChip(m.vf):g=='Dota 2'?dtChip(m.vf):''}${x?`<button class="gbx" onclick="event.stopPropagation();gbEx(this)" aria-expanded="false" aria-label="${t('Подробнее про','More about')} ${g}">${SV(ICHEV,18)}</button>`:''}</div>${gdl(g,m.sk[g],m.rl[g],m.goal,m.vf)}</div>`}).join('')}${more.length?`<div class="gmore">${t('Ещё играет','Also plays')}: ${more.map(g=>gI(g,16)+g).join(' · ')}</div>`:''}${ab?`<p class="ab">${esc(ab)}</p>`:''}</div></div>`}
+function card(m,live){const all=Object.keys(m.sk).sort((a,b)=>(S.p.games.includes(b)?1:0)-(S.p.games.includes(a)?1:0)),fg=live?(fgOk()&&m.sk[fgOk()]?fgOk():S.p.games.length==1&&m.sk[S.p.games[0]]?S.p.games[0]:''):'',gs=fg?[fg]:all,more=fg?all.filter(g=>g!=fg):[],goal=GOALS.find(x=>x[0]==goalOf(fg&&m.sk[fg]&&m.sk[fg].gl||m.goal)),ab=m.about[S.lang=='ru'?0:1]||m.about[0],bn=m.bn||{m:'auto'},gli=bnr({banner:bn}).gl,gc=BC[gli],gx=GLX[gli]||'';
+ return `<div class="card hb${gc?' gw':''}${fg?' ex':''} ${gx}" ${live?'id="cd"':''} ${gc&&!gx?`style="${glowVars(gc[1])}"`:''}><div class="cb">${bannerHtml({banner:bn,games:gs},0,0,1)}</div>${live?``:''}<div class="ph" style="${m.photo?`background-image:url(${m.photo});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:#0b1a14`:''}">${m.photo?'':`<i>${esc((m.n||'?')[0]).toUpperCase()}</i>`}${m.lm||m.bs?`<div class="trt">${m.lm?`<span class="lk">💚 ${t('Зовёт в сквад','Wants you in')}</span>`:''}${m.bs?`<span class="bsb">${SV(ROCKET,14)}${t('Буст','Boost')}</span>`:''}</div>`:''}${live?`<span class="stamp l" id="sl">${IH} ${t('В сквад','Squad up')}</span><span class="stamp n" id="sn">${IX} ${t('Скип','Skip')}</span>`:''}<div class="ov"><div class="ovr"><b class="nm ${bn.nc?'nc-'+bn.nc:''}">${esc(m.n)||'—'}</b><span class="ag">${gnd(m.g)}${m.a}</span></div><div class="ovs"><span class="gtg">${t(goal[1],goal[2])}</span>${m.ls<3?`<span class="lsn s${m.ls}"><i></i>${[t('В сети','Online'),t('Был(а) сегодня','Active today'),t('Был(а) недавно','Active recently')][m.ls]}</span>`:''}</div></div>${live?`<button class="cflag" onclick="event.stopPropagation();cardMenu()" aria-label="${t('Пожаловаться','Report')}" title="${t('Пожаловаться','Report')}">${SV(IFLAG,15)}</button>`:''}</div>
+ <div class="in">${m.mc===1||m.mc===0||m.vc||(m.vf&&m.vf.s)?`<div class="cfx">${micBadge(m.mc)}${m.vc?`<span class="vcb">${SV(IHS,13)}Discord</span>`:''}${m.vf&&m.vf.s?`<span class="svb" role="button" tabindex="0" onclick="event.stopPropagation();vInfo('st')">${VSH(13)}Steam</span>`:''}</div>`:''}${gs.map(g=>{const x=!fg&&gex(g,m.sk[g],m.vf);return `<div class="gb${fg?' ex':''}"><div class="gr2${x?' hx':''}">${gI(g,28)}<b>${g}</b>${rk(g,m.sk[g])}${g=='CS2'?fcChip(m.vf):g=='Dota 2'?dtChip(m.vf):''}${x?`<button class="gbx" onclick="event.stopPropagation();gbEx(this)" aria-expanded="false" aria-label="${t('Подробнее про','More about')} ${g}">${SV(ICHEV,18)}</button>`:''}</div>${gdl(g,m.sk[g],m.rl[g],m.goal,m.vf)}</div>`}).join('')}${more.length?`<div class="gmore">${t('Ещё играет','Also plays')}: ${more.map(g=>gI(g,16)+g).join(' · ')}</div>`:''}${ab?`<p class="ab">${esc(ab)}</p>`:''}</div></div>`}
 function gbEx(b){const g=b.closest('.gb');g.classList.toggle('ex');b.setAttribute('aria-expanded',g.classList.contains('ex'));const c=b.closest('.card');if(c&&c.id=='cd')fitCard()}
 
 function askFb(pre){if(document.querySelector('.fbm'))return;const d=document.createElement('div');d.className='mm fbm';
@@ -1473,8 +1513,7 @@ function saveSheet(){if(!SH.k)return;if(SH.try)return buyItem(SH.try.k,SH.try.a)
 function profile(){const p=S.p;
  if(!M&&!Merr&&!profile.ld){profile.ld=1;loadM().then(()=>{profile.ld=0;if(S.view=='profile')R()})}
  const bd=(M&&M.badges)||[],goal=GOALS.find(x=>x[0]==goalOf(p.goal));
- const bdh=`<div class="hbd" onclick="badgeGuide()">${bd.length?bd.map(id=>`<span class="bdc">${(BDG.find(b=>b[0]==id)||[])[1]||''}</span>`).join('')+`<span class="hbn">${bd.length}/${BDG.length}</span>`:`<span class="hbe">🏅 ${t('Получи значки','Earn badges')}</span>`}</div>`;
- return `<div class="hero">${bannerHtml(p,1)}${avatar(p,1)}${bdh}</div>
+ return `<div class="hero">${bannerHtml(p,1)}${avatar(p,1)}</div>
  <div class="nmr" style="margin:12px 0 0"><h2 class="${bnr(p).nc?'nc-'+bnr(p).nc:''}" style="text-transform:uppercase;min-width:0;overflow-wrap:anywhere">${esc(p.nick)}</h2><button class="pen" onclick="openSheet('about')" aria-label="edit">${PEN}</button></div>
  <div class="pinf"><span>${gnd(p.gender)}${p.age}</span><i aria-hidden="true">·</i>${p.mic===1||p.mic===0?`<button class="pmic" onclick="micSheet()">${SV(p.mic?IMIC:IMICX,15)}${p.mic?t('Микрофон','Mic'):t('Без микрофона','No mic')}</button>`:`<button class="pmic q" onclick="micSheet()">${SV(IMIC,15)}${t('Указать микрофон','Add mic')}</button>`}<i aria-hidden="true">·</i><span>${t(goal[1],goal[2])}</span></div>
  <button class="abx2${p.about?'':' q'}" onclick="openSheet('about')"><span class="abt"><small>${t('О себе','About')}</small><span>${p.about?esc(p.about):t('Расскажи, когда играешь и как','Tell when and how you play')}</span></span><span class="abp" aria-hidden="true">${p.about?PEN:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'}</span></button>
@@ -1494,7 +1533,6 @@ function info(){const ch=(M&&M.channel)||CH;
   [t('Что такое ⚡ и как их получить?','What is ⚡ and how do I get it?'),t('Молнии дают за миссии: подписка на канал, анкета с фото, 20 свайпов в день, первый мэтч, друзья. Тратятся на буст и оформление.','You earn bolts for missions: join the channel, a profile with a photo, 20 swipes a day, your first match, inviting friends. Spend them on a boost and cosmetics.')],
   [t('Что даёт буст?','What does a boost do?'),t('12 часов твоя анкета показывается первой в ленте у других игроков, со значком «Буст».','For 12 hours your profile is shown first in other players’ feeds, with a “Boost” badge.')],
   [t('Кто видит мой Telegram, Discord и Steam?','Who sees my Telegram, Discord and Steam?'),t('Только тот, с кем у тебя мэтч — когда вы оба нажали «В сквад». Остальные видят лишь значок «Discord».','Only your matches — when you both tapped “Squad up”. Others only see a “Discord” badge.')],
-  [t('Что значат значки?','What do the badges mean?'),t('Их дают за миссии: подписка на канал, первый мэтч, приглашённые друзья. Нажми на значок, чтобы узнать подробнее.','You get them for missions: channel subscription, first match, invited friends. Tap a badge to learn more.')],
   [t('Как пожаловаться или скрыть анкету?','How do I report or hide a profile?'),t('Нажми на флажок в углу карточки в ленте. Анкета сразу пропадёт, а жалобу мы проверим.','Tap the flag in the corner of a card. The profile disappears at once, and we review the report.')],
   [t('Как удалить анкету?','How do I delete my profile?'),t('«Инфо» → «Аккаунт» → «Удалить профиль». Анкета, свайпы и мэтчи удалятся.','Info → Account → Delete profile. Your profile, swipes and matches are removed.')]
  ].map(q=>`<details><summary><span>${q[0]}</span></summary><p>${q[1]}</p></details>`).join('')}</div>
@@ -1534,7 +1572,7 @@ function leftTxt(){const s=Math.max(0,M.boost_until-M.now-(Date.now()/1000-M.t0)
 function mrow(x,title,desc,extra){const d=x.done,pc=Math.min(100,x.p/x.n*100);
  return `<div class="box ${d?'mdn':''}${R.focus==x.key?' hl':''}" id="ms-${x.key}"><b>${d?'✅ ':''}${title}</b><span class="rw">+1 ⚡${x.key=='invite'?' '+t('за друга','each'):x.key=='swipes'?' '+t('в день','daily'):''}</span><div class="mt" style="margin:2px 0 8px;font-size:12.5px">${desc}</div><div class="mis"><div class="pg"><i style="width:${pc}%"></i></div><span>${x.p}/${x.n}</span></div>${extra||''}</div>`}
 function tasks(){
- const head=`<div class="nmr" style="margin:16px 0 8px"><h2>${t('Миссии','Missions')}</h2><button class="tag tap" onclick="badgeGuide()">🏅 ${t('Значки','Badges')}</button></div>`;
+ const head=`<div class="nmr" style="margin:16px 0 8px"><h2>${t('Миссии','Missions')}</h2></div>`;
  if(!M)return head+`<div class="box empty"><div style="font-size:40px">${Merr?'📡':'⚡'}</div><p class="mt" style="margin:8px 0 0">${Merr?t('Не удалось загрузить миссии','Could not load missions'):t('Загружаем…','Loading…')}</p>${Merr?`<button class="btn" style="margin-top:14px" onclick="go('tasks')">${t('Повторить','Retry')}</button>`:''}</div>`;
  const tk=Math.max(0,M.tokens);
  const boost=`<button class="bst2" onclick="boostSheet()"><span class="bic">${SV(ROCKET,20)}</span><span class="bx"><b>${t('Буст анкеты','Profile boost')}</b><small>${t(`${M.boost_hours} ч первым в ленте за ${M.boost_cost} ⚡`,`${M.boost_hours} h at the top of the feed for ${M.boost_cost} ⚡`)}</small></span><span class="tk">⚡ ${tk}</span></button>`;
@@ -1613,7 +1651,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkMatch
 /* Автообновление: Telegram держит копию приложения до 10 минут. При запуске сверяем номер версии с version.json
    (без кэша); если вышла новая — перезагружаемся по адресу с ?v=<версия>, и Telegram берёт свежий файл.
    Номер меняет tools/bump_build.py перед выкладкой. */
-var APP_BUILD='20261109224654';
+var APP_BUILD='20261109231954';
 (function(){try{var t0=Date.now();if(!window.fetch||!window.URL)return;
  fetch('version.json?_='+t0,{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){
   if(!j||!j.b||j.b===APP_BUILD)return;
